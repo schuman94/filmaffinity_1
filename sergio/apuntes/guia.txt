@@ -228,3 +228,143 @@ protected $casts = [
 
 Para crear un uuid:
 numero = (string) Str::uuid()
+
+
+ENERO 2025
+
+----------------RELACIONES POLIMORFICAS: UNO A MUCHOS-------------------------------------------------
+
+Ejemplo:
+Un dispositivo puede pertenecer a un ordenador o a un aula.
+El dispositivo es quien tiene la clave ajena que puede apuntar a un ordenador o un aula.
+Un ordenador puede tener muchos dispositivos y un aula puede tener muchos dispositivos.
+Consideramos tanto al ordenador como al aula con un nombre que nos inventamos. Por ejemplo, "colocable".
+De forma que un dispositivo pertenece a un colocable. Y un colocable puede tener muchos dispositivos.
+Nos encontramos ante una relación de 1 a muchos pero polimorfica.
+
+Primero es necesario crear las migraciones de los dos tipos de colocables: aula y ordenador. Se crean como siempre, no hay nada nuevo.
+Luego creamos la migración de dispositivos, en donde se añade:
+    $table->morphs('colocable');
+Esto crea dos columnas en la tabla: colocable_id y colocable_type
+
+Para cada fila:
+colocable_type contiene la clase a la que pertenece el colocable: App\Models\Ordenador o App\Models\Aula
+colocable_id contiene la clave ajena, es decir, el id de la tabla ordenadores o aulas.
+
+En la clase Dispositivo hay que añadir el método equivalente al belongsTo:
+    public function colocable() {
+        return $this->morphTo();
+    }
+
+En las clases Aula y Ordenador hay que añadir el método equivalente al hasMany:
+    public function dispositivos() {
+        return $this->morphMany(Dispositivo::class, 'colocable');
+    }
+
+En el store y el update del controlador de Dispositivo será necesario implementar la creación o modificación de las columnas colocable_id y colocable_type
+(Ver ejemplo en el proyecto schuman94/ordenadores)
+
+
+-----------------RELACIONES POLIMORFICAS UNO A UNO-------------------------------------
+
+Suponiendo que un colocable solo puede tener un dispositivo...
+Es igual que la uno a muchos, pero en los "colocables" hay que añadir el método:
+
+    public function dispositivos() {
+        return $this->morphOne(Dispositivo::class, 'colocable');
+    }
+
+----------------RELACIONES POLIMORFICAS MUCHOS A MUCHOS---------------------------------
+
+Supongiendo que posts y videos pueden tener tags...
+
+Aquí hay que crear una tabla intermedia llamada taggeables
+En esa tabla hay que incluir un foreignId de tags y el morphs():
+    $table->foreignId('tag_id')->constrained();
+    $table->morphs('taggable');
+
+Dentro del modelo Post o Video, el metodo tags() usa morphToMany:
+    public function tags()
+    {
+        return $this->morphToMany(Tag::class, 'taggable');
+    }
+
+Dentro del modelo Tag no tenemos un metodo taggeable que devuelva todo, sino un método para cada tipo de taggeable:
+    public function posts()
+    {
+        return $this->morphedByMany(Post::class, 'taggable');
+    }
+
+    public function videos()
+    {
+        return $this->morphedByMany(Video::class, 'taggable');
+    }
+
+
+----------------FACTORIES Y SEEDERS ----------------------------------------------------
+
+En DispositivoFactory.php creamos la factoria usando fake. Ejemplo:
+
+return [
+    'codigo' => fake()->unique()->bothify('DISP-??-####'),
+    'nombre' => fake()->word(),
+    'colocable_id' => rand(1, 5),
+    'colocable_type' => fake()->randomElement([
+        'App\Models\Ordenador',
+        'App\Models\Aula'
+    ]),
+];
+
+Para obtener un id aleatorio disponiblede una clave ajena podemos usar Aula::all()->suffle()-first()->id (en el caso de colocable no porque colocable no es un modelo)
+
+Luego nos vamos a Dispositivo.Seeder.php y creamos la seed. Ejemplo:
+
+public function run(): void
+{
+    Dispositivo::factory()->count(20)->create();
+}
+
+Tambien se puede crear algo manual sin necesidad de factorias. Importante el use Illuminate\Support\Facades\DB; Ejemplo:
+
+public function run(): void
+{
+    DB::table('aulas')->insert([
+        'codigo' => 'IF0',
+        'nombre' => 'Informática',
+    ]);
+}
+
+Nos vamos a DatabaseSeeder.php y indicamos el orden de todos los seeders. Ejemplo:
+
+public function run(): void
+{
+    $this->call([
+        AulaSeeder::class,
+        OrdenadorSeeder::class,
+        DispositivoSeeder::class,
+    ]);
+}
+
+Por ultimo, ejecutamos: php artisan db:seed
+Si queremos reiniciar todo, mejor esto: php artisan migrate:fresh --seed
+
+Podemos cambiar a español el fake. Para ello:
+En app.php cambiamos esta linea: 'faker_locale' => env('APP_FAKER_LOCALE', 'es_ES'),
+En .env cambiamos esta linea: APP_FAKER_LOCALE=es_ES
+
+-------------------------------PAGINACION------------------------------------------------
+
+Cuando retornemos una vista desde web.php o un controlador:
+
+    return view('ordenadores.index', [
+        'ordenadores' => Ordenador::paginate(10),
+    ]);
+
+
+En la vista blade tenemos que añadir abajo:
+
+    <div class="mt-4">
+        {{ $ordenadores->links() }}
+    </div>
+
+-------------------------------------------------------------------------------------
