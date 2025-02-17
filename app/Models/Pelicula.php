@@ -13,4 +13,8 @@ class Pelicula extends Model
     public function generos(){
         return $this->morphToMany(Genero::class, 'generoable');
     }
+
+    public function valoraciones() {
+        return $this->morphMany(Valoracion::class, 'valorable');
+    }
 }
