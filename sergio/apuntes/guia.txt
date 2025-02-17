@@ -1,0 +1,230 @@
+Crear el usuario de la base de datos:
+sudo -u postgres createuser -P examen
+
+Crear la base de datos:
+sudo -u postgres createdb -O examen examen
+
+
+EMPEZAR CLONANDO UN REPOSITORIO
+
+gh repo clone schuman94/nombreProyecto
+cd nombreProyecto
+composer install
+npm install
+Cambiar o crear el .env
+Crear usuario y base de datos si no existen
+php artisan migrate:fresh
+php artisan key:generate
+composer run dev
+
+COMENZANDO A PROGRAMAR
+
+Creamos un modelo desde la consola:
+php artisan make:model -a Empleado
+
+Editamos el archivo en database/migrations para que se cree la tabla empleados:
+public function up(): void
+{
+	Schema::create('empleados', function (Blueprint $table) {
+		$table->id();
+        $table->string('nombre);
+        $table->uuid('codigo')->unique();
+        $table->integer('cantidad')->default(1);
+		$table->decimal('precio', 8, 2);
+		$table->foreignId('departamento_id)->constrained();
+        $table->timestamp('fecha_hora')->nullable();
+        $table->unique(['departamento_id', 'fecha_hora']);
+		$table->index('departamento_id');  (Facilita un: select * from empleado where departamento_id = X;)
+    }
+}
+
+Ejecutamos la migracion:
+php artisan migrate
+(Si quisieramos dar marcha atras: php artisan migrate:rollback)
+
+Podemos insertar filas en la tabla desde la consola: php artisan db
+INSERT INTO empleados (columna1, columna2, columna3, ...)
+VALUES
+(value1, value2, value3, ...),
+(value1, value2, value3, ...),
+(value1, value2, value3, ...);
+
+Creamos la ruta en routes/web.php:
+Route::resource('empleados', EmpleadoController::class);
+
+En app/Http/Controllers/EmpleadoController.php añadimos la vistas para el CRUD de empleados
+
+Ahora debemos irnos a resources/views y crear una carpeta para cada modelo, debe llamarse igual que la tabla (minuscula y plural).
+Dentro de cada carpeta creamos los index.blade.php, create, store, show, edit, update y destroy correspondientes a las funciones creadas en el controlador.
+En cada uno de estos ficheros blade.php todo el código va dentro de un <x-app-layout> o <x-guest-layout>
+
+Ahora tenemos que editar la clase del modelo en app/Models/Empleado.php
+Creamos las funciones que relacionen modelos (tablas). Por ejemplo:
+    public function departamento()
+    {
+        return $this->belongsTo(Departamento::class);
+    }
+
+    public function empleados() {
+        return $this->hasMany(Empleado::class);
+    }
+
+Automaticamente se crea una propiedad que se llama igual pero sin los parentesis () y que devuelve un objeto o una coleccion. Por ejemplo:
+    Empleado->departamento
+    Departamento->empleados
+
+Si en vez de la propiedad usamos el metodo, por ejemplo Empleado->departamento(), devuelve un querybuilder al que puedes continuar con un where() o lo que sea.
+
+
+Reglas en las relaciones:
+En las relaciones 1 a 1, y 1 a muchos, el belongsTo hay que ponerselo al que tenga la foreignId en la tabla.
+
+TABLA PIVOTE: En las relaciones muchos a muchos, se requiere de una tabla intermedia.
+La tabla por  convenio se llama como las dos tablas ordenadas alfabeticamente y con un _ en medio.
+Ejemplo: user_videojuego
+
+php artisan make:migration create_user_videojuego_table
+
+Schema::create('user_videojuego', function (Blueprint $table) {
+            $table->foreignId('user_id')->constrained();
+            $table->foreignId('videojuego_id')->constrained();
+            $table->primary(['user_id', 'videojuego_id']);
+            $table->integer('cantidad')->default(1);
+            $table->timestamps();
+});
+
+Ahora nos vamos a los modelos User y Videojuego y le creamos a ambos la funcion correspondiente con belongsToMany indicandole también si hay alguna columna extra:
+En el modelo Videojuego:
+    public function users() {
+            return $this->belongsToMany(User::class)->withPivot('cantidad');
+    }
+En el modelo User:
+    public function videojuegos() {
+            return $this->belongsToMany(Videojuego::class)->withPivot('cantidad');
+    }
+
+
+Para acceder a la columna pivote hay que pasar de una tabla a otra y luego a la pivote:
+foreach ($user->videojuegos as $videojuego)
+    {{ $videojuego->pivot->cantidad }}
+
+En el modelo Factura hay una funcion calcular_precio() más elaborada que trabaja con las tablas articulo y articulo_factura
+
+En las rutas, podemos meter el controlador de factura dentro del grupo que lleva el middleware de auth para que solo puedan acceder los logeados.
+Además, en el controlador de factura podriamos hacer que solo se obtengan en el index las facturas de user logeado:
+    public function index()
+    {
+        return view('facturas.index', [
+            'facturas' => Factura::where('user_id', Auth::id())->get(),
+        ]);
+    }
+
+Para usar el Auth::id() es necesario cargar: use Illuminate\Support\Facades\Auth;
+En el show podriamos hacer que solo entre quien es usuario de esa factura concreta y si no, que le salga un 404:
+    public function show(Factura $factura)
+    {
+        // Verificar si el usuario autenticado es el propietario de la factura
+        if ($factura->user_id !== Auth::id()) {
+            abort(404);
+        }
+
+        return view('facturas.show', [
+            'factura' => $factura,
+        ]);
+    }
+
+Para crear una ruta diferente:
+Route::put('prestamos/devolver/{prestamo}', [PrestamoController::class, 'devolver'])->name('prestamos.devolver');
+Route::put('videojuegos/adquirir/{videojuego}', [VideojuegoController::class, 'adquirir'])->name('videojuegos.adquirir');
+Route::get('alumnos/criterios/{alumno}', [AlumnoController::class, 'criterios'])->name('alumnos.criterios');
+Además, hay que crear la funcion en el controlador, y un archivo de vista en el caso de alumnos
+
+
+
+
+Para un modelo cuyo PLURAL no es regular:
+En la consola: php artisan make:model Proyeccion
+Corregir con el plural el nombre del archivo de migracion database/migrations/2024_12_08_104912_create_proyecciones_table.php
+Dentro de ese archivo cambiar el nombre de la tabla proyeccions por proyecciones en up() y down()
+En web.php añadir la ruta para proyecciones indicandolo en parameters:
+    Route::resource('proyecciones', ProyeccionController::class)->parameters([
+        'proyecciones' => 'proyeccion',
+    ]);;
+En el controlador escribir 'proyecciones'
+En el modelo especificar el nombre de la tabla:
+     protected $table = 'proyecciones';
+Si proyeccion_id fuese clave foranea de otra tabla, habria que indicarlo explícitamente la migracion de dicha tabla:
+    $table->foreignId('proyeccion_id')->constrained('proyecciones');
+
+
+
+Cuando cuando la clave primaria de la tabla no se llama tablasingular_id:
+En el modelo hay que indicar como se llama la clave foranea de la otra tabla con la que se relaciona:
+    public function notas() {
+        return $this->hasMany(Nota::class, 'ccee_id');
+    }
+
+En otros modelos que se relacionen con el anterior, si tambien hay que crear una funcion de relacion como hasMany, hay que indicar no solo Modelo::class, sino tambien la columna con la clave:
+    public function ce() {
+            return $this->belongsTo(Ce::class, 'ccee_id');
+    }
+
+
+CREAR FUNCIONES GENERICAS:
+Creamos un fichero helpers.php en app/ y añadimos nuestras funciones personalizadas como dinero() y fecha().
+En el composer.json debemos incluir en el autoload esto: "files": ["app/helpers.php"]
+Hacemos un composer dump-autoload para cargarlo.
+
+VALIDATE EN EL CONTROLADOR
+
+public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'codigo' => 'required|string|unique:articulos,codigo',       // valor unico en su propia tabla y columna
+            'descripcion' => 'nullable|string|max:255',
+            'precio' => 'required|numeric|min:0|max:999999.99',         // esto equivale en la migracion a un: decimal('precio', 8, 2)
+            'categoria_id' => 'required|integer|exists:categorias,id',   // debe existir en la columna 'id' de la tabla 'categorias'
+            'fecha' => 'required|date|date_format:Y-m-d',
+            'fecha_hora' => 'required|date|date_format:Y-m-d H:i:s'
+        ]);
+
+        $articulo = Articulo::create($validated);
+        session()->flash('exito', 'Artículo creado correctamente.');
+        return redirect()->route('articulos.show', $articulo);
+    }
+
+
+
+public function update(Request $request, articulo $articulo)
+    {
+        $validated = $request->validate([
+            'codigo' => [
+                'required',
+                'string',
+                Rule::unique('articulos')->ignore($articulo),           // Verifica que sea único en la tabla 'articulos' ignorando su propio codigo
+            ],
+            'descripcion' => 'string|max:255|nullable',
+            'precio' => 'required|numeric|min:0|max:999999.99',
+            'categoria_id' => 'required|integer|exists:categorias,id',
+            'fecha' => 'required|date|date_format:Y-m-d',
+            'fecha_hora' => 'required|date|date_format:Y-m-d H:i:s'
+        ]);
+
+        $articulo->fill($validated);
+        $articulo->save();
+        session()->flash('exito', 'Artículo modificado correctamente.');
+        return redirect()->route('articulo.index');
+    }
+
+
+Es importante que en el modelo incluyamos estos dos codigos:
+
+protected $fillable = ['codigo', 'descripcion', 'precio', 'categoria_id', 'fecha', 'fecha_hora'];
+
+protected $casts = [
+    'fecha' => 'datetime',
+    'fecha_hora' => 'datetime',
+];
+
+Para crear un uuid:
+numero = (string) Str::uuid()
