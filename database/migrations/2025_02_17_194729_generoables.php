@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('generoables', function (Blueprint $table) {
             $table->foreignId('genero_id')->constrained();
             $table->morphs('generoable');
+            $table->primary(['genero_id', 'generoable_type', 'generoable_id']);
         });
     }
 

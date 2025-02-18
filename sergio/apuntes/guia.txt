@@ -368,3 +368,7 @@ En la vista blade tenemos que añadir abajo:
     </div>
 
 -------------------------------------------------------------------------------------
+
+
+el que contiene la clave ajena (o contiene morphs() en la migracion) es quien tiene que utilizar morphsTo en el modelo.
+Y tambien es quine en el controlador tiene que hacer: $x->nosekeable()->associate(fesffsdf);

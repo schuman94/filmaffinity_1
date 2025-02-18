@@ -8,6 +8,7 @@ use App\Models\Genero;
 use App\Models\Pelicula;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class PeliculaController extends Controller
 {
@@ -52,7 +53,7 @@ class PeliculaController extends Controller
      */
     public function show(Pelicula $pelicula)
     {
-        $generos = Genero::all();
+        $generos = Genero::whereNotIn('id', $pelicula->generos()->pluck('id'))->get();
         return view('peliculas.show', [
             'pelicula' => $pelicula,
             'generos' => $generos
@@ -99,7 +100,14 @@ class PeliculaController extends Controller
     public function anyadir_genero(Request $request, Pelicula $pelicula)
     {
         $validated = $request->validate([
-            'genero_id' => 'required|integer|exists:generos,id',
+            'genero_id' => [
+            'required',
+            'integer',
+            'exists:generos,id',
+            Rule::unique('generoables')
+                ->where('generoable_type', Pelicula::class)
+                ->where('generoable_id', $pelicula->id),
+            ],
         ]);
 
         $pelicula->generos()->attach($validated['genero_id']);
