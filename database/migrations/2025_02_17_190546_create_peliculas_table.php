@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('titulo');
             $table->string('director');
-            //$table->foreignId('genero_id')->constrained();
             $table->timestamp('fecha_estreno');
             $table->timestamps();
         });

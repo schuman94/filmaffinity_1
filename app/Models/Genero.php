@@ -10,11 +10,14 @@ class Genero extends Model
     /** @use HasFactory<\Database\Factories\GeneroFactory> */
     use HasFactory;
 
+    protected $fillable = ['nombre'];
+
     public function videojuegos(){
-        return $this->morphedByMany(Videojuego::class, 'taggable');
+        return $this->morphedByMany(Videojuego::class, 'generoable');
     }
 
     public function peliculas(){
-        return $this->morphedByMany(Pelicula::class, 'taggable');
+        return $this->morphedByMany(Pelicula::class, 'generoable');
     }
+
 }

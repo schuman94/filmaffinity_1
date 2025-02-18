@@ -278,7 +278,7 @@ Es igual que la uno a muchos, pero en los "colocables" hay que añadir el métod
 
 Supongiendo que posts y videos pueden tener tags...
 
-Aquí hay que crear una tabla intermedia llamada taggeables
+Aquí hay que crear una tabla intermedia llamada taggables: php artisan make:migration taggables
 En esa tabla hay que incluir un foreignId de tags y el morphs():
     $table->foreignId('tag_id')->constrained();
     $table->morphs('taggable');

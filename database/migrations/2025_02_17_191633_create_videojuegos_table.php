@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('titulo');
             $table->foreignId('desarrollador_id')->constrained('desarrolladores');
-            //$table->foreignId('genero_id')->constrained();
             $table->timestamp('fecha_lanzamiento');
             $table->timestamps();
         });

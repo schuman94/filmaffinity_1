@@ -3,7 +3,11 @@
 //use Illuminate\Support\Facades\Auth;
 //use Illuminate\Support\Facades\DB;
 
+use App\Http\Controllers\DesarrolladorController;
+use App\Http\Controllers\GeneroController;
+use App\Http\Controllers\PeliculaController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\VideojuegoController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,7 +24,23 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-//  Route::resource('libros', LibroController::class);
+Route::resource('desarrolladores', DesarrolladorController::class)->parameters([
+    'desarrolladores' => 'desarrollador',
+]);
+
+Route::resource('videojuegos', VideojuegoController::class);
+Route::resource('peliculas', PeliculaController::class);
+Route::resource('generos', GeneroController::class);
+
+
+Route::put('peliculas/{pelicula}/anyadir_genero', [PeliculaController::class, 'anyadir_genero'])->name('peliculas.anyadir_genero');
+Route::put('videojuegos/{videojuego}/anyadir_genero', [VideojuegoController::class, 'anyadir_genero'])->name('videojuegos.anyadir_genero');
+
+
+
+
+
+
 
 //  Route::get('alumnos/criterios/{alumno}', [AlumnoController::class, 'criterios'])->name('alumnos.criterios');
 

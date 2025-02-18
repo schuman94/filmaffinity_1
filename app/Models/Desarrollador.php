@@ -12,7 +12,10 @@ class Desarrollador extends Model
 
     protected $table = 'desarrolladores';
 
+    protected $fillable = ['nombre'];
+
     public function videojuegos() {
         return $this->hasMany(Videojuego::class);
     }
+
 }

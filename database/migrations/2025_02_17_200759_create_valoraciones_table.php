@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('valoraciones', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained();
+            $table->integer('puntuacion');
             $table->text('comentario');
             $table->morphs('valorable');
             $table->timestamps();

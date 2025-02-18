@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGeneroRequest;
+use Illuminate\Http\Request;
 use App\Http\Requests\UpdateGeneroRequest;
 use App\Models\Genero;
+use Illuminate\Validation\Rule;
 
 class GeneroController extends Controller
 {
@@ -13,7 +15,9 @@ class GeneroController extends Controller
      */
     public function index()
     {
-        //
+        return view('generos.index', [
+            'generos' => Genero::all(),
+        ]);
     }
 
     /**
@@ -21,15 +25,21 @@ class GeneroController extends Controller
      */
     public function create()
     {
-        //
+        return view('generos.create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreGeneroRequest $request)
+    public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:255|unique:generos,nombre',
+        ]);
+
+        $genero = Genero::create($validated);
+        session()->flash('exito', 'Género creado correctamente.');
+        return redirect()->route('generos.show', $genero);
     }
 
     /**
@@ -37,7 +47,9 @@ class GeneroController extends Controller
      */
     public function show(Genero $genero)
     {
-        //
+        return view('generos.show', [
+            'genero' => $genero,
+        ]);
     }
 
     /**
@@ -45,15 +57,28 @@ class GeneroController extends Controller
      */
     public function edit(Genero $genero)
     {
-        //
+        return view('generos.edit', [
+            'genero' => $genero,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateGeneroRequest $request, Genero $genero)
+    public function update(Request $request, Genero $genero)
     {
-        //
+        $validated = $request->validate([
+            'nombre' => [
+                'required',
+                'string',
+                Rule::unique('generos')->ignore($genero),
+            ],
+        ]);
+
+        $genero->fill($validated);
+        $genero->save();
+        session()->flash('exito', 'Genero modificado correctamente.');
+        return redirect()->route('generos.index');
     }
 
     /**
@@ -61,6 +86,7 @@ class GeneroController extends Controller
      */
     public function destroy(Genero $genero)
     {
-        //
+        $genero->delete();
+        return redirect()->route('generos.index');
     }
 }

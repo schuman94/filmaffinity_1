@@ -18,6 +18,18 @@
                     <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
                         Inicio
                     </x-nav-link>
+                    <x-nav-link :href="route('desarrolladores.index')" :active="request()->routeIs('desarrolladores.index')">
+                        Desarrolladores
+                    </x-nav-link>
+                    <x-nav-link :href="route('videojuegos.index')" :active="request()->routeIs('videojuegos.index')">
+                        Videojuegos
+                    </x-nav-link>
+                    <x-nav-link :href="route('peliculas.index')" :active="request()->routeIs('peliculas.index')">
+                        Películas
+                    </x-nav-link>
+                    <x-nav-link :href="route('generos.index')" :active="request()->routeIs('generos.index')">
+                        Géneros
+                    </x-nav-link>
                 </div>
             </div>
 

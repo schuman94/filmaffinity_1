@@ -10,11 +10,13 @@ class Pelicula extends Model
     /** @use HasFactory<\Database\Factories\PeliculaFactory> */
     use HasFactory;
 
+    protected $fillable = ['titulo', 'director', 'fecha_estreno'];
+
     public function generos(){
         return $this->morphToMany(Genero::class, 'generoable');
     }
 
     public function valoraciones() {
-        return $this->morphMany(Valoracion::class, 'valorable');
+        return $this->morphMany(Valoracion::class, 'generoable');
     }
 }
