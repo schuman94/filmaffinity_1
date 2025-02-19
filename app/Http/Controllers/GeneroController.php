@@ -47,8 +47,10 @@ class GeneroController extends Controller
      */
     public function show(Genero $genero)
     {
+        $videojuegos = $genero->videojuegos()->paginate(3);
         return view('generos.show', [
             'genero' => $genero,
+            'videojuegos' => $videojuegos,
         ]);
     }
 

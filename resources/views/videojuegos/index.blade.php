@@ -21,11 +21,9 @@
                                         <th scope="col" class="px-6 py-3">
                                             Desarrollador
                                         </th>
-                                        @auth
                                         <th scope="col" class="px-6 py-3">
                                             Fecha lanzamiento
                                         </th>
-                                        @endauth
                                         <th colspan="3" scope="col" class="px-6 py-3">
                                             Acciones
                                         </th>
@@ -43,11 +41,9 @@
                                             <td class="px-6 py-4">
                                                 {{ $videojuego->desarrollador->nombre }}
                                             </td>
-                                            @auth
                                             <td class="px-6 py-4">
                                                 {{ fecha($videojuego->fecha_lanzamiento) }}
                                             </td>
-                                            @endauth
                                             <td class="px-6 py-4 flex items-center gap-2">
                                                 <a href="{{ route('videojuegos.edit', $videojuego) }}"
                                                     class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
@@ -77,6 +73,9 @@
 
                     </div>
                 </div>
+            </div>
+            <div class="mt-4">
+                {{ $videojuegos->links() }}
             </div>
         </div>
     </div>

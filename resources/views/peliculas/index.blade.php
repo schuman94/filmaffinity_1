@@ -21,11 +21,12 @@
                                         <th scope="col" class="px-6 py-3">
                                             Director
                                         </th>
-                                        @auth
                                         <th scope="col" class="px-6 py-3">
                                             Fecha estreno
                                         </th>
-                                        @endauth
+                                        <th scope="col" class="px-6 py-3">
+                                            Valoraciones
+                                        </th>
                                         <th colspan="3" scope="col" class="px-6 py-3">
                                             Acciones
                                         </th>
@@ -43,11 +44,12 @@
                                             <td class="px-6 py-4">
                                                 {{ $pelicula->director }}
                                             </td>
-                                            @auth
                                             <td class="px-6 py-4">
                                                 {{ fecha($pelicula->fecha_estreno) }}
                                             </td>
-                                            @endauth
+                                            <td class="px-6 py-4">
+                                                {{ $pelicula->valoraciones->count() }}
+                                            </td>
                                             <td class="px-6 py-4 flex items-center gap-2">
                                                 <a href="{{ route('peliculas.edit', $pelicula) }}"
                                                     class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
@@ -77,6 +79,9 @@
 
                     </div>
                 </div>
+            </div>
+            <div class="mt-4">
+                {{ $peliculas->links() }}
             </div>
         </div>
     </div>

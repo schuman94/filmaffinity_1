@@ -7,6 +7,7 @@ use App\Http\Controllers\DesarrolladorController;
 use App\Http\Controllers\GeneroController;
 use App\Http\Controllers\PeliculaController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ValoracionController;
 use App\Http\Controllers\VideojuegoController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,9 +37,12 @@ Route::resource('generos', GeneroController::class);
 Route::put('peliculas/{pelicula}/anyadir_genero', [PeliculaController::class, 'anyadir_genero'])->name('peliculas.anyadir_genero');
 Route::put('videojuegos/{videojuego}/anyadir_genero', [VideojuegoController::class, 'anyadir_genero'])->name('videojuegos.anyadir_genero');
 
+Route::resource('valoraciones', ValoracionController::class)->parameters([
+    'valoraciones' => 'valoracion',
+]);
 
-
-
+Route::put('peliculas/{pelicula}/valorar', [PeliculaController::class, 'valorar'])->name('peliculas.valorar');
+Route::put('videojuegos/{videojuego}/valorar', [VideojuegoController::class, 'valorar'])->name('videojuegos.valorar');
 
 
 

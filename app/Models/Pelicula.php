@@ -17,6 +17,6 @@ class Pelicula extends Model
     }
 
     public function valoraciones() {
-        return $this->morphMany(Valoracion::class, 'generoable');
+        return $this->morphMany(Valoracion::class, 'valorable');
     }
 }

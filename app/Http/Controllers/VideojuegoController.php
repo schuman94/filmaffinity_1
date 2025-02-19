@@ -18,7 +18,7 @@ class VideojuegoController extends Controller
     public function index()
     {
         return view('videojuegos.index', [
-            'videojuegos' => Videojuego::all(),
+            'videojuegos' => Videojuego::paginate(10),
         ]);
     }
 
@@ -56,7 +56,7 @@ class VideojuegoController extends Controller
      */
     public function show(Videojuego $videojuego)
     {
-        $generos = Genero::all();
+        $generos = Genero::whereNotIn('id', $videojuego->generos()->pluck('id'))->get();
         return view('videojuegos.show', [
             'videojuego' => $videojuego,
             'generos' => $generos

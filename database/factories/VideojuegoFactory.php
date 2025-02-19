@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Desarrollador;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +19,9 @@ class VideojuegoFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'titulo' => fake()->unique()->sentence(3),
+            'desarrollador_id' => Desarrollador::all()->shuffle()->first()->id,
+            'fecha_lanzamiento' => Carbon::instance(fake()->dateTimeBetween('-100 years', 'now')),
         ];
     }
 }

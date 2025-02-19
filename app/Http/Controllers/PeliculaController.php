@@ -6,9 +6,11 @@ use App\Http\Requests\StorePeliculaRequest;
 use App\Http\Requests\UpdatePeliculaRequest;
 use App\Models\Genero;
 use App\Models\Pelicula;
+use App\Models\Valoracion;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class PeliculaController extends Controller
 {
@@ -18,7 +20,7 @@ class PeliculaController extends Controller
     public function index()
     {
         return view('peliculas.index', [
-            'peliculas' => Pelicula::all(),
+            'peliculas' => Pelicula::paginate(10),
         ]);
     }
 
@@ -54,9 +56,16 @@ class PeliculaController extends Controller
     public function show(Pelicula $pelicula)
     {
         $generos = Genero::whereNotIn('id', $pelicula->generos()->pluck('id'))->get();
+
+        $valoracionExiste = Valoracion::where('user_id', Auth::id())
+        ->where('valorable_id', $pelicula->id)
+        ->where('valorable_type', Pelicula::class)
+        ->exists();
+
         return view('peliculas.show', [
             'pelicula' => $pelicula,
-            'generos' => $generos
+            'generos' => $generos,
+            'valoracionExiste' => $valoracionExiste,
         ]);
     }
 
@@ -113,6 +122,34 @@ class PeliculaController extends Controller
         $pelicula->generos()->attach($validated['genero_id']);
 
         return redirect()->route('peliculas.show', $pelicula);
+    }
+
+    public function valorar(Request $request, Pelicula $pelicula)
+    {
+        // Se comprueba si ya existe una valoración del usuario para la película
+        $valoracionExiste = Valoracion::where('user_id', Auth::id())
+        ->where('valorable_id', $pelicula->id)
+        ->where('valorable_type', Pelicula::class)
+        ->exists();
+
+        if ($valoracionExiste) {
+            session()->flash('error', 'Ya has valorado esta película.');
+            return redirect()->back();
+        }
+
+        $validated = $request->validate([
+            'puntuacion' => 'required|integer|min:0|max:10',
+            'comentario' => 'required|string',
+        ]);
+
+        // Si no existe, crea la valoración
+        $validated['user_id'] = Auth::id();
+        $validated['valorable_id'] = $pelicula->id;
+        $validated['valorable_type'] = Pelicula::class;
+
+        $valoracion = Valoracion::create($validated);
+        session()->flash('exito', 'Valoración creada correctamente.');
+        return redirect()->route('valoraciones.show', $valoracion);
     }
 
 

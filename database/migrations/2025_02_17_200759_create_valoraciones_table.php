@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('comentario');
             $table->morphs('valorable');
             $table->timestamps();
+            $table->unique(['user_id', 'valorable_id', 'valorable_type']);
         });
     }
 

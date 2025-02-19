@@ -72,6 +72,7 @@
                     </x-dropdown>
                 </div>
             @else
+            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                 <x-nav-link :href="route('login')" :active="request()->routeIs('login')">
                     Login
                 </x-nav-link>
@@ -81,7 +82,9 @@
                         Registrar
                     </x-nav-link>
                 @endif
+            </div>
             @endauth
+
 
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">

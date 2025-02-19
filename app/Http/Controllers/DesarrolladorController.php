@@ -46,8 +46,10 @@ class DesarrolladorController extends Controller
      */
     public function show(Desarrollador $desarrollador)
     {
+        $num_videojuegos = $desarrollador->videojuegos()->count();
         return view('desarrolladores.show', [
             'desarrollador' => $desarrollador,
+            'num_videojuegos' => $num_videojuegos,
         ]);
     }
 

@@ -18,6 +18,9 @@
                                         <th scope="col" class="px-6 py-3">
                                             Nombre
                                         </th>
+                                        <th scope="col" class="px-6 py-3">
+                                            Videojuegos
+                                        </th>
                                         <th colspan="3" scope="col" class="px-6 py-3">
                                             Acciones
                                         </th>
@@ -32,6 +35,9 @@
                                                     {{ $desarrollador->nombre }}
                                                 </a>
                                             </th>
+                                            <td class="px-6 py-4">
+                                                {{ $desarrollador->videojuegos->count() }}
+                                            </td>
                                             <td class="px-6 py-4 flex items-center gap-2">
                                                 <a href="{{ route('desarrolladores.edit', $desarrollador) }}"
                                                     class="font-medium text-blue-600 dark:text-blue-500 hover:underline">

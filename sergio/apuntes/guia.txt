@@ -315,7 +315,7 @@ return [
     ]),
 ];
 
-Para obtener un id aleatorio disponiblede una clave ajena podemos usar Aula::all()->suffle()-first()->id (en el caso de colocable no porque colocable no es un modelo)
+Para obtener un id aleatorio disponiblede una clave ajena podemos usar Aula::all()->shuffle()->first()->id,(en el caso de colocable no porque colocable no es un modelo)
 
 Luego nos vamos a Dispositivo.Seeder.php y creamos la seed. Ejemplo:
 
@@ -351,6 +351,10 @@ Si queremos reiniciar todo, mejor esto: php artisan migrate:fresh --seed
 Podemos cambiar a español el fake. Para ello:
 En app.php cambiamos esta linea: 'faker_locale' => env('APP_FAKER_LOCALE', 'es_ES'),
 En .env cambiamos esta linea: APP_FAKER_LOCALE=es_ES
+
+Comando para crear un Seeder:
+php artisan make:seeder GeneroableSeeder
+
 
 -------------------------------PAGINACION------------------------------------------------
 
