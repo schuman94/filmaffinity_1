@@ -6,11 +6,13 @@ use App\Http\Requests\StorePeliculaRequest;
 use App\Http\Requests\UpdatePeliculaRequest;
 use App\Models\Genero;
 use App\Models\Pelicula;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Valoracion;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class PeliculaController extends Controller
 {
@@ -55,6 +57,7 @@ class PeliculaController extends Controller
      */
     public function show(Pelicula $pelicula)
     {
+
         $generos = Genero::whereNotIn('id', $pelicula->generos()->pluck('id'))->get();
 
         $valoracionExiste = Valoracion::where('user_id', Auth::id())
@@ -108,6 +111,10 @@ class PeliculaController extends Controller
 
     public function anyadir_genero(Request $request, Pelicula $pelicula)
     {
+        if (! Gate::allows('anyadir-genero')) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'genero_id' => [
             'required',

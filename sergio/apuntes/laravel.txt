@@ -1,0 +1,408 @@
+Ctrl + p   es el buscador de archivos de code 
+
+
+Antes de instalar laravel: sudo apt install php-xml php-sqlite3
+
+
+Instalar laravel:
+composer create-project laravel/laravel nombreProyecto
+
+Arrancar el servidor: php artisan serve
+
+Dentro del proyecto: npm install
+npm run build  (construye los assets adecuados)
+
+El comando "composer run dev" es la combinacion del "php artisan serve" + "npm run dev" 
+
+php artisan tinker es el psyshell que tiene laravel
+
+Para crear el repositorio:
+git init
+git add .
+git commit -m "Carga inicial"
+gh repo create
+
+(Recuerda marcar: push and existing local to github)
+
+Instalar la extension de code: laravel extension pack
+
+Primer archivo importante: /routes/web.php
+(rutas que la aplicacion web entiende. Una ruta es una url que la aplicacion es capaz de atender.)
+
+
+Puedes ir a las diferentes views pulsando ctrl + click en el nombre de la vista.
+
+el comando: php artisan route:list   nos devuelve un listado de todas nuestras rutas
+
+En /public/index.php es el front controller
+
+
+En  /config/app.php estan los parametros de configuracion.  Aqui se cargan variables de entorno y en caso de no existir le dan un valor por defecto. Las variables de entorno se crean en:
+
+El archivo /.env contiene las variables de entorno
+Aqui hay que cambiar la base de datos para usar el postgresql
+
+
+El archivo /config/database.php es la configuracion de la base de datos. Normalmente no la tocamos.
+
+Las migraciones se encuentran en /database/migrations
+
+
+
+
+Crear el usuario de la base de datos:
+sudo -u postgres createuser -P agitame
+
+Crear la base de datos:
+sudo -u postgres createdb -O agitame agitame
+
+
+Ahora modificamos en el .env:
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=agitame
+DB_PASSWORD=agitame
+DB_USERNAME=agitame
+
+
+
+Ahora hago:
+php artisan migrate:status  y me dirá que migration table not found. Es normal, nunca se han creado.
+php artisan migrate     esto me crea la tabla de migraciones y aplica todas las migraciones
+
+Comando para abrir la consola de la base de datos con el php artisan:
+php artisan db 
+
+
+
+
+
+
+Instalacion del breeze:
+
+composer require laravel/breeze --dev
+php artisan breeze:install
+php artisan migrate
+npm install
+npm run dev
+
+
+
+
+Los facades (fachadas) son clases que solo tienen métodos estaticos.
+
+
+Asi programaríamos: (en verdad no, es mejor empezar creando el modelo e indicandole que te cree un controlador y mas cosas)
+En web.php creamos una nueva ruta para departamentos
+Luego en resources/view nos creamos una carpeta, por ejemplo, departamentos, y dentro de ella podemos crearnos una vista llamada index.blade.php
+Dentro de index.blade.php lo que escribiriamos seria codigo de frontend dentro de un <x-app-layout> por ejemplo.
+Luego creariamos  una migracion para incluir la tabla departamentos
+
+
+Ejecutamos un: php artisan make:migration create_departamentos_table
+
+y ahora nos vamos a la migracion que se ha creado en: /database/migrations/2024_11_13_201723_create_departamentos_table.php
+
+Aqui añadimos las columnas de departamento.
+
+Luego ejecutamos un: php artisan migrate
+Y ya se corre la migracion para crear la tabla en la base de datos. 
+
+
+
+AQUI VA LO DEL OTRO PC
+php artisan db => abre una consola con el postgres
+
+instalar el flowbite en laravel (primero instala tailwind)
+https://flowbite.com/docs/getting.started/laravel/
+npm install -D flowbite
+
+Modificar el tailwind.config.js, quedaria asi:
+import defaultTheme from 'tailwindcss/defaultTheme';
+import forms from '@tailwindcss/forms';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+    content: [
+        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
+        './storage/framework/views/*.php',
+        './resources/**/*.blade.php',
+        './resources/**/*.js',
+        './resources/**/*.vue',
+        './node_modules/flowbite/**/*.js'
+    ],
+
+    theme: {
+        extend: {
+            fontFamily: {
+                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+            },
+        },
+    },
+
+    plugins: [
+        forms,
+        require('flowbite/plugin')
+    ],
+};
+
+
+En el archivo ./resources/js/app.js hay que añadir: import 'flowbite';
+
+Por si acaso, cerrar el composer run dev y volverlo a arrancar.
+
+
+
+
+Para crear modelo: php artisan make:model -cfs departamento-cfs crea el controlador, la factoria y la semilla
+
+Con eloquent tenemos objetos a los que se les puede aplicar metodos como all, find (busca por id) el save (update o insert)
+
+_________________________________________________________________________________.
+Cuando me clono de 0 un repositorio tengo que hacer esto:                        |
+composer install                                                                 |
+npm install                                                                      | 
+cambiar o crear el .env                                                          | 
+php artisan migrate   (puedes asegurarte poniendo un php artisan migrate:fresh   |
+                       para limpiar todo antes en la base de datos)              |
+php artisan key:generate                                                         |
+composer run dev (para arrancar el servidor tras todos los cambios)              |
+_________________________________________________________________________________|
+
+
+
+El laravel sabe que si mandas un objeto modelo que lleva un id, lee directamente el id del objeto, no hace falta poner $departamento->id vale con $departamento
+
+la funcion dd() es un dump y un die
+
+
+
+
+
+Empezando a programar en laravel
+
+Crear modelo desde la consola: php artisan make:model -cmrfs Empleado
+
+Creamos la migracion  en el archivo correspondiente en database/migrations:
+public function up(): void
+{
+	Schema::create('empleados', function (Blueprint $table) {
+		$table->id();
+		$table->decimal('numero', 4, 0)->unique();
+		$table->foreignId('departamento_id)->constrained();  (poniendo constrained, ya laravel sabe todo, sabe a quien hace referencia esa columna)
+		$table->index('departamento_id');  (Esto se hace para crear un indice en la columna departamento_id, así se busca más rapido, ya que un select * from empleado where departamento_id = X; es algo muy comun)
+	}
+}
+
+Ejecutamos la migracion: php artisan migrate
+
+Luego se rellenaria la tabla con filas
+
+Ahora creamos una ruta. Tiene que haber un EmpleadoController porque antes le dije que lo cree. Nos vamos a routes/web.php y añadimos la nueva ruta:
+Route::resource('empleados', EmpleadoController::class);
+
+En EmpleadoController.php añadimos:
+ public function index() {
+	return view('empleados.index', [
+		dfgaasdf
+	])
+ }
+
+Ahora en views tenemos que crear una carpeta que se llame empleados y dentro de ella un index.blade.php
+Ahora en el index.blade.php de empleado rellenamos todo.
+
+
+Ahora tenemos que tocar la clase Empleado:
+
+Y creamos las funciones (metodos) correspondientes que relacionen modelos (tablas). Luego recuerda que automaticamente se crea una propiedad que se llama igual pero sin los parentesis () y que devuelve un objeto o una coleccion
+Si en vez de la propiedad usamos el metodo, devuelve un querybuilder al que puedes continuar con un where() o lo que sea.
+
+
+public function departamento() {
+	return $this->belongsTo(Departamento::class); 
+}
+
+
+
+
+Reglas en las relaciones.
+En las relaciones 1 a 1, y 1 a muchos, el belongsTo hay que ponerselo al que tenga la clave ajena.
+
+
+Herramienta para depuracion (eficiencia de peticiones y respuestas)
+composer require itsgoingd/clockwork
+instalar la extension de clockwork del google chrome desde la web underground.works/clockwork
+Gracias a esto podemos observar las consultas a la base de datos que se realizan con la peticion-respuesta
+
+
+Resolver el problema del n+1: usando el with  (carga ansiosa, es decir eager loading en vez de lazy loading)
+Empleado::with('departamento')->get()
+
+
+
+
+El $request->validate hace una marcha atrás si hay algun fallo al validar. Regresa al formulario y muestra los errores.
+
+Asignacion masiva de todos los atributos de un objeto:
+$departamento->fill($validate)
+
+$validate es un array donde las claves y valor son los atributos que tiene el objeto departamento
+
+Hay que tener en cuenta que hay atributos que no se deben rellenar con la asignación masiva y otros si.
+Para que un atributo sea fillable, hay que indicarlo en el codigo del modelo (de la clase)
+
+
+Relaciones muchos a muchos, requieren de una tabla intermedia (tabla pivote). La tabla por  convenio se llama como las dos tablas ordenadas alfabeticamente y con un _ en medio.
+
+Departamento            articulo_departamento            Articulo
+
+
+Las columnas de la tabla pivote son las claves primarias de las otras dos tablas. La clave primaria de la tabla intermedia es la union de las dos columnas.
+departamento_id y articulo_id
+
+
+
+Vamos a crear primero el articulo:
+php artisan make:model -cmrfs Articulo 
+
+Va a tener una columna "precio" de tipo decimal (no numeric)
+
+
+Ahora creamos la relacion:
+php artisan make:migration create_articulo_departamento_table  (si nos fijamos he hecho un make:migration en vez de make:model, porque ahora solo se crea la migracion, no hay modelo)
+
+Ahora dentro de la migración modificamos el schema::create, tenemos que meterle:
+$table->foreignId('departamento_id)->constrained();
+$table->foreignId('articulo_id)->constrained();
+$table->primary(['departamento_id', 'articulo_id']);
+
+Tal como está escrito, tenemos ya un indice creado para buscar por departamento_id, también para buscar por departamento_id y luego por articulo_id.
+Pero no tenemos indice para buscar directamente por articulo_id, asi que podriamos crearlo. Aunque por ahora no lo vamos a hacer.
+
+Ahora nos vamos al modelo Departamento y en la funcion articulos() hacemos un return $this->belongsToMany(Articulo:class);
+
+Ahora nos vamos al modelo Articulo y en la funcion departamentos() hacemos un return $this->belongsToMany(Departamento:class);
+
+
+Si a un departamento concreto (inf) quieres asociarle un articulo (tuerca):
+$inf->articulos()->attach($tuerca)
+Esto lo que hace es que en la tabla pivote se  crea una fila que asocia ambos id
+El attach permite meterle un array de ids si quieres insertarle varios. Tambien está el detach
+
+
+
+(Recordatorio de que el map puede ser util en algunas ocasiones cuando trabajemos con arrays)
+$inf->articulos->map(function ($x) {return $x->id; })->all()
+
+
+
+
+Con respecto al tema de las vistas
+
+Tenemos estas dos cosas:
+<x-app-layout>
+<x-slot name="header">
+
+
+Por ejemplo en las vistas de los departamentos:
+En resources/views/departamentos/index.blade.php vemos que todo el codigo está dentro de un:
+<x-app-layout>
+    //
+</x-app-layout>
+
+Todo eso de ahi dentro es lo que el archivo resources/views/layouts/app.blade.php recibe dentro de:
+<main>
+    {{ $slot }}
+</main>
+
+x-app-layout va asociado con layouts/app.blade.php
+
+Parece que lo que siempre se renderiza es el app.blade.php metiendole el contenido de nuestro otro archivo en el slot
+
+
+Esto por ahora no va a ocurrir, pero si alguna vez se renderizase un archivo llamado layouts/pepe.blade.php 
+Yo podria tener un archivo en donde tenga todo dentro de un x-pepe-layout 
+Y todo eso iria al {{ $slot }} de otro archivo layouts/pepe.blade.php que he creado
+
+
+
+En resources/views/layouts/app.blade.php hay en alguna parte del codigo un {{ $header}}
+Eso significa que ahí aparecerá el mismo contenido que se encuentra en el archivo resources/views/departamentos/index.blade.php dentro de:
+<x-slot name="header">
+    //        
+</x-slot>
+Esto ocurre porque le hemos puesto un name="header"
+
+
+En layouts tenemos tambien el guest, no solo el app. En el guest (<x-guest-layout> en guest.blade.php) no se necesita logearse.
+
+
+Sin embargo, ricardo modificó el navigation.blade.php para que en el app tambien se pueda acceder sin logearse. Esta es la parte del navigation modificada con un @auth y @else:
+
+@auth
+    <!-- Settings Dropdown -->
+    <div class="hidden sm:flex sm:items-center sm:ms-6">
+        <x-dropdown align="right" width="48">
+            <x-slot name="trigger">
+                <button
+                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                    <div>{{ Auth::user()->name }}</div>
+
+                    <div class="ms-1">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                </button>
+            </x-slot>
+
+            <x-slot name="content">
+                <x-dropdown-link :href="route('profile.edit')">
+                    {{ __('Profile') }}
+                </x-dropdown-link>
+
+                <!-- Authentication -->
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+
+                    <x-dropdown-link :href="route('logout')"
+                        onclick="event.preventDefault();
+                                    this.closest('form').submit();">
+                        {{ __('Log Out') }}
+                    </x-dropdown-link>
+                </form>
+            </x-slot>
+        </x-dropdown>
+    </div>
+@else
+    <x-nav-link :href="route('login')" :active="request()->routeIs('login')">
+        Login
+    </x-nav-link>
+
+    @if (Route::has('register'))
+        <x-nav-link :href="route('register')" :active="request()->routeIs('register')">
+            Registrar
+        </x-nav-link>
+    @endif
+@endauth
+
+
+
+
+
+Creacion de un carrito:
+Para laravel, los modelos son modelos de eloquent (van asociados a una tabla). El carrito va a ser una clase que no está asociado a una tabla,
+por lo que no lo vamos a guardar en app/Models, sino que creamos la carpeta app/Generico y ahi dentro metemos el Carrito.php
+
+Con lineas hacemos lo mismo.
+
+funcion util: count() para saber cuantos elementos tiene un array
+
+
+con esto obtenemos un id exclusivo que en teoria nunca se va a repetir. Es perfecto por ejemplo para el numero de una factura, en vez de usar un codigo secuencial.
+numero = (string) Str::uuid()
+

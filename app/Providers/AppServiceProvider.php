@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Pelicula;
+use App\Models\User;
+use App\Models\Valoracion;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +23,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::define('update-valoracion', function (User $user, Valoracion $valoracion) {
+            return $user->id === $valoracion->user->id;
+        });
+
+        Gate::define('anyadir-genero', function (User $user) {
+            return $user->name == 'Admin';
+        });
     }
 }

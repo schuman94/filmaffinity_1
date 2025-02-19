@@ -1,0 +1,190 @@
+Instalar PHP: sudo apt install php-cli
+Comprobar versión de PHP: php -v
+Lanzar un servidor web: php -S 127.0.0.1:PUERTO
+
+Instalar la extension "php intelephense" en code
+
+
+Editar archivo de configuracion en /etc/php/8.2/cli/php.ini
+
+Buscamos esta parte del archivo:
+
+display_errors = On       AQUÍ HAY QUE PONER "On"
+
+; The display of errors which occur during PHP's startup sequence are handled
+; separately from display_errors. We strongly recommend you set this to 'off'
+; for production servers to avoid leaking configuration details.
+; Default Value: On
+; Development Value: On
+; Production Value: Off
+; https://php.net/display-startup-errors
+display_startup_errors = On   AQUÍ HAY QUE PONER "On"
+
+
+; https://php.net/error-reporting
+error_reporting = E_ALL         AQUÍ HAY QUE DEJAR SOLO EL "E_ALL"
+
+
+[Date]
+; Defines the default timezone used by the date functions
+; https://php.net/date.timezone
+date.timezone = 'UTC'         AQUÍ HAY QUE PONER 'UTC'
+
+
+
+
+
+sudo apt install php-mbstring
+
+Por defecto debian lo activa, pero se puede activar manualmente:
+Activar modulos en /etc/php/8.2/cli/conf.d creando un enlace simbolico de los archivos que se encuentran en /etc/php/8.2/mods-available/
+
+
+La funcion phpinfo() vuelca en la salida toda la informacion del php que tenemos instalado, incluida su configuración y sus modulos activos.
+
+
+sudo apt install postgresql postgresql-client
+comprobar que el postgresql está activo: sudo systemctl status postgresql
+
+
+crear usuario: sudo -u postgres createuser -P datos
+crear base de datos: sudo -u postgres createdb -O datos datos
+Entrar en la base de datos con el cliente: psql -h localhost -U datos -d datos
+
+Inyección de código sql:
+psql -h localhost -U datos -d datos < datos.sql  (Podemos incluir esto en un script sh)
+
+Para tener el PDO: sudo apt install php-pgsql
+
+Configurar postgres: sudo nano /etc/postgresql/15/main/postgresql.conf
+
+
+# - Locale and Formatting -
+
+datestyle = 'iso, dmy'
+intervalstyle = 'iso_8601'
+timezone = 'UTC'
+
+
+Hay que reiniciar el postgres cuando se hacen cambios en la configuracion: sudo systemctl restart postgresql
+
+
+***
+
+Instalar la extension pgcrypto en template1 para que siempre que creemos una base de datos nueva tenga esa extensión:
+sudo -u postgres psql -d template1
+create extension pgcrypto;
+
+Tambien puedes hacerlo en tu base de datos si ya la tenias de antes.
+
+
+Amenazas de seguridad:
+-Inyección de codigo (sql): Filtrar la entrada
+-Cross-site scripting (inyeccion de codigo javascript): Necesitamos escapar la salida.
+-CSRF (te pueden robar tu phpssid para utilizar tu sesion): Tenemos que generar y comprobar siempre el token _csrf
+
+Instalar npm: sudo apt install npm
+Si no deja, entonces: sudo rm /var/lib/apt/lists/*_*
+                      sudo apt update
+                      sudo apt install npm
+
+Instalar tailwind: (esto hay que hacerlo en cada proyecto)
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init
+
+Configurar el fichero tailwind.config.js
+Crear el input.css
+
+Configurar el fichero package.json
+
+En una terminal aparte puedes ejecutar "npm run watch" para vigilar los cambios en los archivos del "content" del tailwind.config.js y así se actualiza automaticamente el output.css.
+el output.css es el que enlazas en tu html para meterle el estilo.
+<link rel="stylesheet" href=output.css>
+
+Recomendable instalar la extension Inline fold de un tal Mohamed
+
+Hay que crear un .gitignore para incluir nodemodules
+Y recuerda que entonces si te vuelves a traer desde github el proyecto, tendras que generar el nodemodules con npm install -D tailwindcss postcss autoprefixer
+
+Comando para que se genere o modifique el output.css automaticamente con cada cambio que hagas: npm run watch (hay que dejarlo en una terminal aparte)
+
+php -S 127.0.0.1:8000 -t public   (Con este comando lanzamos el servidor indicando que el document root es la carpeta public)
+
+Instalar el flowbite:
+npm install flowbite   (en la carpeta raiz del proyecto)
+Seguimos instrucciones de https://flowbite.com/docs/getting-started/quickstart/
+
+
+Dentro de la carpeta js que está en public, creamos un enlace simbolico a la  carpeta dist que está en el node_modules/flowbite  (esto se debe a que el html no puede acceder fuera)
+Dentro de la carpeta js: ln -s ../../node_modules/flowbite/dist flowbite
+
+Ahora podemos incluir el enlace en el html: <script src="/js/flowbite/flowbite.js"></script>
+
+
+
+Obtener composer:
+sudo apt install composer
+
+Antes de instalar el mpdf nos hace falta un paquete de php:
+sudo apt install php-gd
+
+
+En la carpeta principal del proyecto podemos instalar paquetes con composer:
+composer require mpdf/mpdf
+
+Metemos la carpeta vendor en el .gitignore al igual que el node_modules
+
+
+Si quiero un paquete de composer solo para desarrollo: composer require nombrepaquete --dev
+
+Restaurar la carpeta vendor: composer install
+
+Autoloader:
+
+En el psy shell escribir:
+include 'vendor/autoload.php';
+
+
+
+En el codigo hay que poner un:
+require 'vendor/autoload.php'; (hay que indicar la ruta bien)
+
+
+Para que el autoloader busque en la carpeta src cuando en el espacio de nombre hay un App. En el composer.json hay que incluir esto:
+ "autoload": {
+        "psr-4": {"App\\": "src/"}
+    }
+
+Ejecutar esto:
+composer dump autoload
+
+Ahora cuando se use una clase de otro fichero, el autoloader lo carga, 
+aunque se debe indicar el nombre totalmente cualificado y si no, el autoloader te lo indica dandole a control + espacio + intro, haciendo que se ponga arriba con un "use".
+
+
+Aunque si queremos que se cargue no una clase, sino un archivo que contiene funciones (como el auxiliar php), 
+entonces lo que hay que hacer es poner en el autoload del composer.json mas cosas:
+
+{
+    "require": {
+        "mpdf/mpdf": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {"App\\": "src/"},
+        "files": ["src/auxiliar.php"]
+    }
+}
+
+
+Asi ya no tenemos que hacer un require auxiliar.php
+
+
+Cada vez que toquemos ese archivo hay que hacer el composer dump autoload
+
+
+Despues de instalar un paquete con composer, es necesario realizar con el psy shell el include 'vendor/autoload.php'
+
+
+El paquete doctrine/inflector es bastante util, tiene funciones tipicas para manipulacion de cadenas como eliminar acentos, transformar en plural, etc.
+
+

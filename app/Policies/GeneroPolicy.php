@@ -63,4 +63,5 @@ class GeneroPolicy
     {
         return false;
     }
+
 }

@@ -6,12 +6,14 @@ use App\Http\Requests\StoreVideojuegoRequest;
 use App\Http\Requests\UpdateVideojuegoRequest;
 use App\Models\Desarrollador;
 use App\Models\Genero;
+use App\Models\User;
 use App\Models\Videojuego;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\Valoracion;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class VideojuegoController extends Controller
 {
@@ -114,6 +116,10 @@ class VideojuegoController extends Controller
 
     public function anyadir_genero(Request $request, Videojuego $videojuego)
     {
+        if (! Gate::allows('anyadir-genero')) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'genero_id' => [
             'required',

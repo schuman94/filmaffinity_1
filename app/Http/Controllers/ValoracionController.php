@@ -6,6 +6,7 @@ use App\Http\Requests\StoreValoracionRequest;
 use App\Http\Requests\UpdateValoracionRequest;
 use App\Models\Valoracion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ValoracionController extends Controller
 {
@@ -48,6 +49,10 @@ class ValoracionController extends Controller
      */
     public function edit(Valoracion $valoracion)
     {
+        if (! Gate::allows('update-valoracion', $valoracion)) {
+            abort(403);
+        }
+
         return view('valoraciones.edit',[
             'valoracion' => $valoracion,
         ]);
@@ -58,6 +63,11 @@ class ValoracionController extends Controller
      */
     public function update(Request $request, Valoracion $valoracion)
     {
+
+        if (! Gate::allows('update-valoracion', $valoracion)) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'puntuacion' => 'required|integer|min:0|max:10',
             'comentario' => 'required|string',

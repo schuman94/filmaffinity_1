@@ -1,0 +1,8 @@
+Opcion 1:
+X Aplicación web en la que existen peliculas y videojuegos.
+Existen usuarios, los cuales pueden hacer una valoracion tanto de peliculas o videojuegos.
+Una valoracion pertenece a un usuario y a una pelicula. Tiene una puntuación y un comentario.
+Existen diferentes rankings, en donde las peliculas o los videojuegos tienen una puntuación basada en la media de sus notas dadas por los usuarios. Los rankings no son tablas, sino que se calculan y se pueden aplicar filtros de fechas, tipo de medio, etc.
+Implementar restricciones de autenticacion, politicas, gates, etc para que los usuarios solo puedan modificar sus comentarios.
+Utilizar liveware aunque en el breeze se haya optado por blade.
+Meter paginación

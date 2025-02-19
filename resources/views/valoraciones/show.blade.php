@@ -50,6 +50,7 @@
                         </div>
                     </dl>
                     <dl class="max-w-md text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
+                        @can('update-valoracion', $valoracion)
                         <div class="flex flex-col pb-3">
                             <dd class="text-lg font-semibold">
                                 <a href="{{ route('valoraciones.edit', $valoracion) }}"class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
@@ -57,6 +58,7 @@
                                 </a>
                             </dd>
                         </div>
+                        @endcan
                     </dl>
                 </div>
             </div>
