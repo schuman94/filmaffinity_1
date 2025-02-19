@@ -41,21 +41,7 @@ Route::resource('valoraciones', ValoracionController::class)->parameters([
     'valoraciones' => 'valoracion',
 ]);
 
-Route::put('peliculas/{pelicula}/valorar', [PeliculaController::class, 'valorar'])->name('peliculas.valorar');
-Route::put('videojuegos/{videojuego}/valorar', [VideojuegoController::class, 'valorar'])->name('videojuegos.valorar');
-
-
-
-//  Route::get('alumnos/criterios/{alumno}', [AlumnoController::class, 'criterios'])->name('alumnos.criterios');
-
-//  Route::put('prestamos/devolver/{prestamo}', [PrestamoController::class, 'devolver'])->name('prestamos.devolver');
-
-//  Route::post('videojuegos/adquirir/{videojuego}', [VideojuegoController::class, 'adquirir'])->name('videojuegos.adquirir')->middleware('auth');
-
-
-
-//  Route::resource('ejemplares', EjemplarController::class)->parameters([
-//      'ejemplares' => 'ejemplar',
-//  ]);
+Route::put('peliculas/{pelicula}/valorar', [PeliculaController::class, 'valorar'])->name('peliculas.valorar')->middleware('auth');
+Route::put('videojuegos/{videojuego}/valorar', [VideojuegoController::class, 'valorar'])->name('videojuegos.valorar')->middleware('auth');
 
 require __DIR__.'/auth.php';
