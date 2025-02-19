@@ -15,10 +15,17 @@
                                 Título
                             </dt>
                             <dd class="text-lg font-semibold">
-
-                                <a href="{{ route('peliculas.show', $valoracion->valorable) }}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                                    {{ $valoracion->valorable->titulo }}
-                                </a>
+                                @if ($valoracion->valorable instanceof App\Models\Pelicula)
+                                    <a href="{{ route('peliculas.show', $valoracion->valorable) }}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                        {{ $valoracion->valorable->titulo }}
+                                    </a>
+                                @elseif ($valoracion->valorable instanceof App\Models\Videojuego)
+                                    <a href="{{ route('videojuegos.show', $valoracion->valorable) }}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                        {{ $valoracion->valorable->titulo }}
+                                    </a>
+                                @else
+                                    <span class="text-gray-500">No disponible</span>
+                                @endif
                             </dd>
                         </div>
                     </dl>

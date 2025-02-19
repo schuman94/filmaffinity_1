@@ -6,9 +6,12 @@ use App\Http\Requests\StoreVideojuegoRequest;
 use App\Http\Requests\UpdateVideojuegoRequest;
 use App\Models\Desarrollador;
 use App\Models\Genero;
-use Illuminate\Http\Request;
 use App\Models\Videojuego;
+use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\Valoracion;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class VideojuegoController extends Controller
 {
@@ -18,7 +21,7 @@ class VideojuegoController extends Controller
     public function index()
     {
         return view('videojuegos.index', [
-            'videojuegos' => Videojuego::paginate(10),
+            'videojuegos' => Videojuego::paginate(20),
         ]);
     }
 
@@ -57,9 +60,16 @@ class VideojuegoController extends Controller
     public function show(Videojuego $videojuego)
     {
         $generos = Genero::whereNotIn('id', $videojuego->generos()->pluck('id'))->get();
+
+        $valoracionExiste = Valoracion::where('user_id', Auth::id())
+        ->where('valorable_id', $videojuego->id)
+        ->where('valorable_type', Videojuego::class)
+        ->exists();
+
         return view('videojuegos.show', [
             'videojuego' => $videojuego,
-            'generos' => $generos
+            'generos' => $generos,
+            'valoracionExiste' => $valoracionExiste,
         ]);
     }
 
@@ -105,11 +115,46 @@ class VideojuegoController extends Controller
     public function anyadir_genero(Request $request, Videojuego $videojuego)
     {
         $validated = $request->validate([
-            'genero_id' => 'required|integer|exists:generos,id',
+            'genero_id' => [
+            'required',
+            'integer',
+            'exists:generos,id',
+            Rule::unique('generoables')
+                ->where('generoable_type', Videojuego::class)
+                ->where('generoable_id', $videojuego->id),
+            ],
         ]);
 
         $videojuego->generos()->attach($validated['genero_id']);
 
         return redirect()->route('videojuegos.show', $videojuego);
+    }
+
+    public function valorar(Request $request, Videojuego $videojuego)
+    {
+        // Se comprueba si ya existe una valoración del usuario para la videojuego
+        $valoracionExiste = Valoracion::where('user_id', Auth::id())
+        ->where('valorable_id', $videojuego->id)
+        ->where('valorable_type', Videojuego::class)
+        ->exists();
+
+        if ($valoracionExiste) {
+            session()->flash('error', 'Ya has valorado este videojuego.');
+            return redirect()->back();
+        }
+
+        $validated = $request->validate([
+            'puntuacion' => 'required|integer|min:0|max:10',
+            'comentario' => 'required|string',
+        ]);
+
+        // Si no existe, crea la valoración
+        $validated['user_id'] = Auth::id();
+        $validated['valorable_id'] = $videojuego->id;
+        $validated['valorable_type'] = Videojuego::class;
+
+        $valoracion = Valoracion::create($validated);
+        session()->flash('exito', 'Valoración creada correctamente.');
+        return redirect()->route('valoraciones.show', $valoracion);
     }
 }

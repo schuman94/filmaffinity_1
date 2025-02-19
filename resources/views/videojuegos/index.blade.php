@@ -24,6 +24,9 @@
                                         <th scope="col" class="px-6 py-3">
                                             Fecha lanzamiento
                                         </th>
+                                        <th scope="col" class="px-6 py-3">
+                                            Valoraciones
+                                        </th>
                                         <th colspan="3" scope="col" class="px-6 py-3">
                                             Acciones
                                         </th>
@@ -43,6 +46,9 @@
                                             </td>
                                             <td class="px-6 py-4">
                                                 {{ fecha($videojuego->fecha_lanzamiento) }}
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                {{ $videojuego->valoraciones->count() }}
                                             </td>
                                             <td class="px-6 py-4 flex items-center gap-2">
                                                 <a href="{{ route('videojuegos.edit', $videojuego) }}"

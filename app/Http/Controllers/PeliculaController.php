@@ -6,9 +6,9 @@ use App\Http\Requests\StorePeliculaRequest;
 use App\Http\Requests\UpdatePeliculaRequest;
 use App\Models\Genero;
 use App\Models\Pelicula;
+use Illuminate\Http\Request;
 use App\Models\Valoracion;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 
@@ -20,7 +20,7 @@ class PeliculaController extends Controller
     public function index()
     {
         return view('peliculas.index', [
-            'peliculas' => Pelicula::paginate(10),
+            'peliculas' => Pelicula::paginate(20),
         ]);
     }
 
