@@ -64,7 +64,7 @@
                 </table>
             </div>
 
-
+            @can('anyadir-genero')
             <div class="py-6">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <form method="POST" action="{{ route('peliculas.anyadir_genero', $pelicula) }}" class="max-w-sm mx-auto">
@@ -94,6 +94,7 @@
                     </form>
                 </div>
             </div>
+            @endcan
 
             <div class="relative overflow-x-auto mt-10">
                 <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -134,7 +135,7 @@
             </div>
 
 
-            @if (!$valoracionExiste)
+            @cannot('pelicula-valorada', $pelicula)
             <div class="py-6">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <form method="POST" action="{{ route('peliculas.valorar', $pelicula) }}" class="max-w-sm mx-auto">
@@ -165,7 +166,7 @@
                     </form>
                 </div>
             </div>
-            @endif
+            @endcannot
         </div>
     </div>
 </x-app-layout>

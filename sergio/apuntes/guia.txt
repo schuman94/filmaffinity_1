@@ -264,6 +264,9 @@ En las clases Aula y Ordenador hay que añadir el método equivalente al hasMany
 En el store y el update del controlador de Dispositivo será necesario implementar la creación o modificación de las columnas colocable_id y colocable_type
 (Ver ejemplo en el proyecto schuman94/ordenadores)
 
+El que contiene la clave ajena (o contiene morphs() en la migracion) es quien tiene que utilizar morphsTo en el modelo.
+Y tambien es quien en el controlador tiene que hacer: $x->nosekeable()->associate(fesffsdf);
+
 
 -----------------RELACIONES POLIMORFICAS UNO A UNO-------------------------------------
 
@@ -273,6 +276,7 @@ Es igual que la uno a muchos, pero en los "colocables" hay que añadir el métod
     public function dispositivos() {
         return $this->morphOne(Dispositivo::class, 'colocable');
     }
+
 
 ----------------RELACIONES POLIMORFICAS MUCHOS A MUCHOS---------------------------------
 
@@ -299,6 +303,7 @@ Dentro del modelo Tag no tenemos un metodo taggeable que devuelva todo, sino un 
     {
         return $this->morphedByMany(Video::class, 'taggable');
     }
+
 
 
 ----------------FACTORIES Y SEEDERS ----------------------------------------------------
@@ -371,8 +376,64 @@ En la vista blade tenemos que añadir abajo:
         {{ $ordenadores->links() }}
     </div>
 
--------------------------------------------------------------------------------------
+---------------------------------GATES-------------------------------------------------------
 
+En AppServiceProvider.php creamos la gate. La funcion siempre debe devolver true o false. Aquí unos ejemplos:
 
-el que contiene la clave ajena (o contiene morphs() en la migracion) es quien tiene que utilizar morphsTo en el modelo.
-Y tambien es quine en el controlador tiene que hacer: $x->nosekeable()->associate(fesffsdf);
+        Gate::define('update-valoracion', function (User $user, Valoracion $valoracion) {
+            return $user->id === $valoracion->user->id;
+        });
+
+        Gate::define('anyadir-genero', function (User $user) {
+            return $user->name == 'Admin';
+        });
+
+        Gate::define('pelicula-valorada', function (User $user, Pelicula $pelicula) {
+            return Valoracion::where('user_id', $user->id)
+            ->where('valorable_id', $pelicula->id)
+            ->where('valorable_type', Pelicula::class)
+            ->exists();
+        });
+
+El user siempre se inyecta. Pero además puede requerir otro modelo.
+
+Luego nos vamos al controlador (o al web.php) y dentro de la funcion en la que queramos aplicar la gate, añadimos al principio la condición.
+Normalmente se usa la negacion (!), ya que se trata de NO PERMITIR. Aquí unos ejemplos:
+        if (! Gate::allows('anyadir-genero')) {
+            abort(403);
+        }
+
+Aqui no se usa negación (!) porque la logica es si existe un videojuego valorado, entonces no se permite.
+        if (Gate::allows('videojuego-valorado', $videojuego)) {
+            abort(403);
+        }
+
+Si queremos que aparezca/no aparezca el <div> que se encarga de esa acción en la plantilla blade, utilizamos:
+@can('anyadir-genero') y @endcan   (En este caso no se necesita inyectar nada, el usuario ya se inyecta por defecto)
+@cannot('videojuego-valorado', $videojuego) y @endcannot (En este caso la gate necesita que se inyecte el videojuego)
+
+----------------------------------SOFT DELETE-----------------------------------------------------------------------
+
+Creamos una migracion para incluir la columna deleted_at:
+php artisan make:migration --table=peliculas add_peliculas_deleted_at_column
+
+En el método up incluimos:   $table->softDeletes();
+En el método down incluimos: $table->dropSoftDeletes();
+
+En la clase Pelicula incluimos: use SoftDeletes;
+
+Ahora cuando se utilice el método delete() presente en el controlador, se hará un softdelete automaticamente.
+
+Si queremos consultar con eloquent todas las filas incluidas las eliminadas: Pelicula::withTrashed()->get()
+Si queremos consultar con eloquent solo las peliculas eliminadas: Pelicula::onlyTrashed()->get()
+
+Para restaurar una pelicula eliminada utilizamos el método restore(). Pero hay que tener cuidado,
+ya que si recibimos desde una petición la pelicula, laravel no inyectará la pelicula eliminada, tan solo tendremos su id.
+    public function restaurar($id)
+    {
+        $pelicula = Pelicula::onlyTrashed()->find($id);
+        $pelicula->restore();
+
+        session()->flash('exito', 'Pelicula restaurada.');
+        return redirect()->route('peliculas.show', $pelicula);
+    }

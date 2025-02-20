@@ -62,7 +62,7 @@
                 </table>
             </div>
 
-
+            @can('anyadir-genero')
             <div class="py-6">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <form method="POST" action="{{ route('videojuegos.anyadir_genero', $videojuego) }}" class="max-w-sm mx-auto">
@@ -92,6 +92,7 @@
                     </form>
                 </div>
             </div>
+            @endcan
 
             <div class="relative overflow-x-auto mt-10">
                 <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -131,8 +132,7 @@
                 </table>
             </div>
 
-
-            @if (!$valoracionExiste)
+            @cannot('videojuego-valorado', $videojuego)
             <div class="py-6">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <form method="POST" action="{{ route('videojuegos.valorar', $videojuego) }}" class="max-w-sm mx-auto">
@@ -163,7 +163,7 @@
                     </form>
                 </div>
             </div>
-            @endif
+            @endcannot
         </div>
     </div>
 </x-app-layout>

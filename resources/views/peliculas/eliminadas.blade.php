@@ -27,9 +27,6 @@
                                         <th scope="col" class="px-6 py-3">
                                             Valoraciones
                                         </th>
-                                        <th scope="col" class="px-6 py-3">
-                                            Puntuación media
-                                        </th>
                                         <th colspan="3" scope="col" class="px-6 py-3">
                                             Acciones
                                         </th>
@@ -53,21 +50,12 @@
                                             <td class="px-6 py-4">
                                                 {{ $pelicula->valoraciones->count() }}
                                             </td>
-                                            <td class="px-6 py-4">
-                                                {{ $pelicula->valoraciones->pluck('puntuacion')->avg() }}
-                                            </td>
                                             <td class="px-6 py-4 flex items-center gap-2">
-                                                <a href="{{ route('peliculas.edit', $pelicula) }}"
-                                                    class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                                                    Editar
-                                                </a>
-                                                <form method="POST" action="{{ route('peliculas.destroy', $pelicula) }}">
-                                                    @method('DELETE')
+                                                <form method="POST" action="{{ route('peliculas.restaurar', $pelicula) }}">
                                                     @csrf
                                                     <button type="submit"
-                                                        class="font-medium text-red-600 dark:text-red-500 hover:underline ms-3"
-                                                        onclick="return confirm('¿Está seguro?');">
-                                                        Eliminar
+                                                        class="font-medium text-red-600 dark:text-red-500 hover:underline ms-3">
+                                                        Restaurar
                                                     </button>
                                                 </form>
                                             </td>

@@ -37,3 +37,10 @@ if (!function_exists('tiempo')) {
         return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
     }
 }
+
+if (!function_exists('numero_2_decimales')){
+    function numero_2_decimales($s)
+    {
+        return number_format($s, 2, '.', ' ');
+    }
+}

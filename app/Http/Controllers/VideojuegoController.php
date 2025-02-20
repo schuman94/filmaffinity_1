@@ -63,15 +63,9 @@ class VideojuegoController extends Controller
     {
         $generos = Genero::whereNotIn('id', $videojuego->generos()->pluck('id'))->get();
 
-        $valoracionExiste = Valoracion::where('user_id', Auth::id())
-        ->where('valorable_id', $videojuego->id)
-        ->where('valorable_type', Videojuego::class)
-        ->exists();
-
         return view('videojuegos.show', [
             'videojuego' => $videojuego,
             'generos' => $generos,
-            'valoracionExiste' => $valoracionExiste,
         ]);
     }
 
@@ -138,15 +132,10 @@ class VideojuegoController extends Controller
 
     public function valorar(Request $request, Videojuego $videojuego)
     {
-        // Se comprueba si ya existe una valoración del usuario para la videojuego
-        $valoracionExiste = Valoracion::where('user_id', Auth::id())
-        ->where('valorable_id', $videojuego->id)
-        ->where('valorable_type', Videojuego::class)
-        ->exists();
-
-        if ($valoracionExiste) {
-            session()->flash('error', 'Ya has valorado este videojuego.');
-            return redirect()->back();
+        if (Gate::allows('videojuego-valorado', $videojuego)) {
+            abort(403);
+            //session()->flash('error', 'Ya has valorado este videojuego.');
+            //return redirect()->back();
         }
 
         $validated = $request->validate([
@@ -154,7 +143,6 @@ class VideojuegoController extends Controller
             'comentario' => 'required|string',
         ]);
 
-        // Si no existe, crea la valoración
         $validated['user_id'] = Auth::id();
         $validated['valorable_id'] = $videojuego->id;
         $validated['valorable_type'] = Videojuego::class;
@@ -162,5 +150,88 @@ class VideojuegoController extends Controller
         $valoracion = Valoracion::create($validated);
         session()->flash('exito', 'Valoración creada correctamente.');
         return redirect()->route('valoraciones.show', $valoracion);
+    }
+
+
+    public function eliminados()
+    {
+        $videojuegos = Videojuego::onlyTrashed()->paginate(10);
+
+        return view('videojuegos.eliminados', [
+            'videojuegos' => $videojuegos,
+        ]);
+    }
+
+    // Aquí en vez del parámetros Videojuego $videojuego, debemos indicar $id.
+    // Laravel no inyecta objetos eliminados, tan solo obtenemos un integer.
+    public function restaurar($id)
+    {
+        // Por lo tanto, hay que obtener el videojuego a partir de su id
+        $videojuego = Videojuego::onlyTrashed()->find($id);
+
+        if (!$videojuego) {
+            return redirect()->route('videojuegos.eliminados')->with('error', 'Videojuego no encontrada.');
+        }
+
+        $videojuego->restore();
+
+        session()->flash('exito', 'Videojuego restaurado.');
+        return redirect()->route('videojuegos.show', $videojuego);
+    }
+
+    public function ranking(Request $request)
+    {
+        // Obtener todos los géneros para la vista
+        $generos = Genero::all();
+
+        // Iniciar la consulta base
+        $query = Videojuego::query();
+
+
+        // Filtrar por fecha de lanzamiento
+        if ($request->filled('fecha_inicio') && $request->filled('fecha_fin')) {
+            // Si ambas fechas están presentes, filtrar entre ellas
+            $query->whereBetween('fecha_lanzamiento', [$request->fecha_inicio, $request->fecha_fin]);
+        } elseif ($request->filled('fecha_inicio')) {
+            // Si solo hay fecha de inicio, filtrar desde esa fecha en adelante
+            $query->where('fecha_lanzamiento', '>=', $request->fecha_inicio);
+        } elseif ($request->filled('fecha_fin')) {
+            // Si solo hay fecha de fin, filtrar hasta esa fecha
+            $query->where('fecha_lanzamiento', '<=', $request->fecha_fin);
+        }
+
+        // Filtrar por género
+        if ($request->filled('genero_id')) {
+            $query->whereHas('generos', function ($q) use ($request) {
+                $q->where('generos.id', $request->genero_id);
+            });
+        }
+
+        // Filtrar por desarrollador
+        if ($request->filled('desarrollador')) {
+            $query->whereHas('desarrollador', function ($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->desarrollador . '%');
+            });
+        }
+
+        // Obtener todas ls videojuegos con las valoraciones
+        $videojuegos = $query->with('valoraciones')->get();
+
+        // Filtrar en PHP por puntuación mínima
+        if ($request->filled('puntuacion_minima')) {
+            $videojuegos = $videojuegos->filter(function ($videojuego) use ($request) {
+                return $videojuego->valoraciones->pluck('puntuacion')->avg() >= $request->puntuacion_minima;
+            });
+        }
+
+        // Ordenar por puntuación promedio en PHP
+        $videojuegos = $videojuegos->sortByDesc(function ($videojuego) {
+            return $videojuego->valoraciones->pluck('puntuacion')->avg() ?? 0;
+        });
+
+        return view('videojuegos.ranking', [
+            'videojuegos' => $videojuegos,
+            'generos' => $generos,
+        ]);
     }
 }

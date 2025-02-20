@@ -12,12 +12,6 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
-                        Inicio
-                    </x-nav-link>
                     <x-nav-link :href="route('desarrolladores.index')" :active="request()->routeIs('desarrolladores.index')">
                         Desarrolladores
                     </x-nav-link>
@@ -29,6 +23,18 @@
                     </x-nav-link>
                     <x-nav-link :href="route('generos.index')" :active="request()->routeIs('generos.index')">
                         Géneros
+                    </x-nav-link>
+                    <x-nav-link :href="route('peliculas.eliminadas')" :active="request()->routeIs('peliculas.eliminadas')">
+                        Películas eliminadas
+                    </x-nav-link>
+                    <x-nav-link :href="route('videojuegos.eliminados')" :active="request()->routeIs('videojuegos.eliminados')">
+                        Videojuegos eliminados
+                    </x-nav-link>
+                    <x-nav-link :href="route('peliculas.ranking')" :active="request()->routeIs('peliculas.ranking')">
+                        Ranking películas
+                    </x-nav-link>
+                    <x-nav-link :href="route('videojuegos.ranking')" :active="request()->routeIs('videojuegos.ranking')">
+                        Ranking videojuegos
                     </x-nav-link>
                 </div>
             </div>

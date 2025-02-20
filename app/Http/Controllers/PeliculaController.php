@@ -60,15 +60,9 @@ class PeliculaController extends Controller
 
         $generos = Genero::whereNotIn('id', $pelicula->generos()->pluck('id'))->get();
 
-        $valoracionExiste = Valoracion::where('user_id', Auth::id())
-        ->where('valorable_id', $pelicula->id)
-        ->where('valorable_type', Pelicula::class)
-        ->exists();
-
         return view('peliculas.show', [
             'pelicula' => $pelicula,
             'generos' => $generos,
-            'valoracionExiste' => $valoracionExiste,
         ]);
     }
 
@@ -133,15 +127,11 @@ class PeliculaController extends Controller
 
     public function valorar(Request $request, Pelicula $pelicula)
     {
-        // Se comprueba si ya existe una valoración del usuario para la película
-        $valoracionExiste = Valoracion::where('user_id', Auth::id())
-        ->where('valorable_id', $pelicula->id)
-        ->where('valorable_type', Pelicula::class)
-        ->exists();
 
-        if ($valoracionExiste) {
-            session()->flash('error', 'Ya has valorado esta película.');
-            return redirect()->back();
+        if (Gate::allows('pelicula-valorada', $pelicula)) {
+            abort(403);
+            //session()->flash('error', 'Ya has valorado esta película.');
+            //return redirect()->back();
         }
 
         $validated = $request->validate([
@@ -149,7 +139,6 @@ class PeliculaController extends Controller
             'comentario' => 'required|string',
         ]);
 
-        // Si no existe, crea la valoración
         $validated['user_id'] = Auth::id();
         $validated['valorable_id'] = $pelicula->id;
         $validated['valorable_type'] = Pelicula::class;
@@ -159,5 +148,82 @@ class PeliculaController extends Controller
         return redirect()->route('valoraciones.show', $valoracion);
     }
 
+    public function eliminadas()
+    {
+        $peliculas = Pelicula::onlyTrashed()->paginate(10);
 
+        return view('peliculas.eliminadas', [
+            'peliculas' => $peliculas,
+        ]);
+    }
+
+    // Aquí en vez del parámetros Pelicula $pelicula, debemos indicar $id.
+    // Laravel no inyecta objetos eliminados, tan solo obtenemos un integer.
+    public function restaurar($id)
+    {
+        // Por lo tanto, hay que obtener la pelicula a partir de su id
+        $pelicula = Pelicula::onlyTrashed()->find($id);
+
+        if (!$pelicula) {
+            return redirect()->route('peliculas.eliminadas')->with('error', 'Película no encontrada.');
+        }
+
+        $pelicula->restore();
+
+        session()->flash('exito', 'Pelicula restaurada.');
+        return redirect()->route('peliculas.show', $pelicula);
+    }
+
+    public function ranking(Request $request)
+    {
+        // Obtener todos los géneros para la vista
+        $generos = Genero::all();
+
+        // Iniciar la consulta base
+        $query = Pelicula::query();
+
+        // Filtrar por fecha de estreno
+        if ($request->filled('fecha_inicio') && $request->filled('fecha_fin')) {
+            // Si ambas fechas están presentes, filtrar entre ellas
+            $query->whereBetween('fecha_estreno', [$request->fecha_inicio, $request->fecha_fin]);
+        } elseif ($request->filled('fecha_inicio')) {
+            // Si solo hay fecha de inicio, filtrar desde esa fecha en adelante
+            $query->where('fecha_estreno', '>=', $request->fecha_inicio);
+        } elseif ($request->filled('fecha_fin')) {
+            // Si solo hay fecha de fin, filtrar hasta esa fecha
+            $query->where('fecha_estreno', '<=', $request->fecha_fin);
+        }
+
+        // Filtrar por género
+        if ($request->filled('genero_id')) {
+            $query->whereHas('generos', function ($q) use ($request) {
+                $q->where('generos.id', $request->genero_id);
+            });
+        }
+
+        // Filtrar por director
+        if ($request->filled('director')) {
+            $query->where('director', 'like', '%' . $request->director . '%');
+        }
+
+        // Obtener todas las películas con las valoraciones
+        $peliculas = $query->with('valoraciones')->get();
+
+        // Filtrar en PHP por puntuación mínima
+        if ($request->filled('puntuacion_minima')) {
+            $peliculas = $peliculas->filter(function ($pelicula) use ($request) {
+                return $pelicula->valoraciones->pluck('puntuacion')->avg() >= $request->puntuacion_minima;
+            });
+        }
+
+        // Ordenar por puntuación promedio en PHP
+        $peliculas = $peliculas->sortByDesc(function ($pelicula) {
+            return $pelicula->valoraciones->pluck('puntuacion')->avg() ?? 0;
+        });
+
+        return view('peliculas.ranking', [
+            'peliculas' => $peliculas,
+            'generos' => $generos,
+        ]);
+    }
 }
