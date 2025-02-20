@@ -67,10 +67,12 @@
 
                     <!-- Filtro por puntuación mínima -->
                     <div>
-                        <x-input-label for="puntuacion_minima" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        <x-input-label for="puntuacion_minima"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                             Puntuación mínima
                         </x-input-label>
-                        <x-text-input name="puntuacion_minima" type="number" id="puntuacion_minima" min="0" max="10"
+                        <x-text-input name="puntuacion_minima" type="number" id="puntuacion_minima" min="0"
+                            max="10"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-20 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             :value="request('puntuacion_minima', 0)" />
                         <x-input-error :messages="$errors->get('puntuacion_minima')" class="mt-2" />
@@ -88,46 +90,59 @@
             </div>
             <div class="mt-6">
                 @if ($videojuegos->count())
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead
-                        class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                        <tr>
-                            <th scope="col" class="px-6 py-3">
-                                Título
-                            </th>
-                            <th scope="col" class="px-6 py-3">
-                                Desarrollador
-                            </th>
-                            <th scope="col" class="px-6 py-3">
-                                Fecha lanzamiento
-                            </th>
-                            <th scope="col" class="px-6 py-3">
-                                Puntuacion
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($videojuegos as $videojuego)
-                            <tr
-                                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                    <a href="{{ route('videojuegos.show', $videojuego) }}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                                        {{ $videojuego->titulo }}
-                                    </a>
+                    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">
+                                    Posición
                                 </th>
-                                <td class="px-6 py-4">
-                                    {{ $videojuego->desarrollador->nombre }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    {{ fecha($videojuego->fecha_lanzamiento) }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    {{ numero_2_decimales($videojuego->valoraciones->pluck('puntuacion')->avg()) }}
-                                </td>
+                                <th scope="col" class="px-6 py-3">
+                                    Título
+                                </th>
+                                <th scope="col" class="px-6 py-3">
+                                    Desarrollador
+                                </th>
+                                <th scope="col" class="px-6 py-3">
+                                    Fecha lanzamiento
+                                </th>
+                                <th scope="col" class="px-6 py-3">
+                                    Puntuacion
+                                </th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @php
+                                $contador = 0;
+                            @endphp
+                            @foreach ($videojuegos as $videojuego)
+                                @php
+                                    $contador++;
+                                @endphp
+                                <tr
+                                    class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        {{ $contador}}
+                                    </th>
+                                    <td scope="row"
+                                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        <a href="{{ route('videojuegos.show', $videojuego) }}"
+                                            class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                            {{ $videojuego->titulo }}
+                                        </a>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ $videojuego->desarrollador->nombre }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ fecha($videojuego->fecha_lanzamiento) }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ numero_2_decimales($videojuego->valoraciones->pluck('puntuacion')->avg()) }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 @else
                     <p class="mt-4 text-gray-500">No se encontraron videojuegos con los filtros seleccionados.</p>
                 @endif

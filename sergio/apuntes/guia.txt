@@ -437,3 +437,6 @@ ya que si recibimos desde una petición la pelicula, laravel no inyectará la pe
         session()->flash('exito', 'Pelicula restaurada.');
         return redirect()->route('peliculas.show', $pelicula);
     }
+
+
+/ php artisan route:list
