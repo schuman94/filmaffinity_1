@@ -329,6 +329,10 @@ public function run(): void
     Dispositivo::factory()->count(20)->create();
 }
 
+Las factorias se pueden usar en cualquier lugar donde necesites crear un objeto, como en un test.
+Además, se le puede especificar algun atributo manualmente y sobrescribirá al que estaba por defecto en la factoria.
+$desarrollador1 = Desarrollador::factory()->create(['nombre' =>'Sony']);
+
 Tambien se puede crear algo manual sin necesidad de factorias. Importante el use Illuminate\Support\Facades\DB; Ejemplo:
 
 public function run(): void
@@ -439,4 +443,18 @@ ya que si recibimos desde una petición la pelicula, laravel no inyectará la pe
     }
 
 
-/ php artisan route:list
+-------------------------------------TEST--------------------------------------------------------------------------------
+Crear el .env.testing y dentro cambiar los parámetros
+APP_ENV=testing
+DB_DATABASE=noseké_testing
+
+Crear el archivo de test:
+php artisan make:test VideojuegoTest
+
+Dentro de tests/Feature/VideoJuegoTest.php implementar los diferentes tests (Ejemplos en schuman94/filmaffinity_1)
+Por si acaso necesitas consultar las rutas para el post, put o lo que sea: php artisan route:list
+Tener en cuenta que en cada test individual la base de datos se reinicia, es decir, las filas creadas se borran.
+Pero cuidado porque eso no significa que los id se reinicien, si se crea otra fila, tendrá el id siguiente id que toque.
+
+Ejecutar los tests:
+php artisan test --env=testing (Esto ultimo no es necesario si se ha creado el .env.testing)
