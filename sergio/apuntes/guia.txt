@@ -458,3 +458,53 @@ Pero cuidado porque eso no significa que los id se reinicien, si se crea otra fi
 
 Ejecutar los tests:
 php artisan test --env=testing (Esto ultimo no es necesario si se ha creado el .env.testing)
+
+
+-----------------------------------CORREO---------------------------------------------------------------------------------
+En el mail.php tenemos la configuracion, pero ya viene bien por defecto.
+Configurar el archivo .env:
+    MAIL_MAILER=smtp
+    MAIL_SCHEME=null
+    MAIL_HOST=127.0.0.1
+    MAIL_PORT=1025
+    MAIL_USERNAME=examen
+    MAIL_PASSWORD=examen
+    MAIL_ENCRYPTION=null
+    MAIL_FROM_ADDRESS="examen@examen.com"
+    MAIL_FROM_NAME="${APP_NAME}"
+
+Descargamos el Mailpit: sudo bash < <(curl -sL https://raw.githubusercontent.com/axllent/mailpit/develop/install.sh)
+Para arrancarlo, ejecutamos en una terminal: mailpit
+Podemos acceder desde: http://127.0.0.1:8025/ (si falla, reinicia el servidor composer)
+
+Creación de los archivos:
+    opcion html:        php artisan make:mail PeliculaValorada
+    opcion markdown:    php artisan make:mail PeliculaValoradaMd --markdown=emails.pelicula-valorada-md (Vamos a usar esta)
+
+Se crean los archivos: app/Mail/PeliculaValoradaMd.php y resources/views/emails/pelicula-valorada-md.blade.php
+
+Nos vamos al lugar donde queremos que se ejecute la accion de enviar el correo (un controlador o en web.php) y escribimos lo siguiente:
+Mail::to(Auth::user()->email)->send(new PeliculaValoradaMd($valoracion, $pelicula));
+en to() se indica el mail del destinatario.
+en send() se indica una nueva instancia del mailable. Se le pueden pasar parámetros.
+
+Importante los use:
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PeliculaValoradaMd;
+
+En el caso de que hayamos pasado parámetros al constructor del mailable, debemos implementarlo en el PeliculaValoradaMd.php:
+
+class PeliculaValoradaMd extends Mailable
+{
+    public $valoracion;
+    public $pelicula;
+
+    public function __construct(Valoracion $valoracion, Pelicula $pelicula)
+    {
+        $this->valoracion = $valoracion;
+        $this->pelicula = $pelicula;
+    }
+
+Por ultimo, escribimos el contenido en pelicula-valorada-md.blade.php:
+    Has realizado una valoración de la película: {{$pelicula->titulo}}.
+    Puntuación: {{$valoracion->puntuacion}}

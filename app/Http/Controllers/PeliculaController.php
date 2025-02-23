@@ -13,6 +13,8 @@ use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PeliculaValoradaMd;
 
 class PeliculaController extends Controller
 {
@@ -144,6 +146,9 @@ class PeliculaController extends Controller
         $validated['valorable_type'] = Pelicula::class;
 
         $valoracion = Valoracion::create($validated);
+
+        Mail::to(Auth::user()->email)->send(new PeliculaValoradaMd($valoracion, $pelicula));
+
         session()->flash('exito', 'Valoración creada correctamente.');
         return redirect()->route('valoraciones.show', $valoracion);
     }
