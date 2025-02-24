@@ -545,4 +545,34 @@ Los parámetros se recogen en ValoracionesPelicula.php:
         }
     }
 
+OTRA OPCION
+Si lo que queremos es acceder a una vista de Livewire desde una ruta:
+php artisan make:livewire counter (Se crean los dos archivos correspondientes)
+
+Y en el web.php añadimos:
+    use App\Livewire\Counter;
+    Route::get('/counter', Counter::class);
+
+Para acceder a esa vista desde http://127.0.0.1:8000/counter hay que crear un layout desde el que se renderiza:
+php artisan livewire:layout
+Esto nos crea el fichero: resources/views/components/layouts/app.blade.php
+Y gracias a ese fichero se podrá renderizar cualquier vista livewire indicada en el web.php
+
 ----------------------LIVEWIRE USANDO BREEZE--------------------------------------------------
+Primero instalamos el Breeze:
+    composer require laravel/breeze --dev
+    php artisan breeze:install (Aquí hay que elegir la segunda opción: Livewire (Volt Class API) with Alpine)
+
+Creamos el layout para livewire:
+php artisan livewire:layout
+Esto genera el archivo resources/views/components/layouts/app.blade.php
+
+Creamos el componente de livewire asociado a un modelo:
+    php artisan make:livewire counter LibroIndex
+
+En app/Livewire/LibroIndex.php implementamos la logica como si fuese un controlador
+
+Lo añadimos como ruta en el web.php:
+    Route::get('/libros', LibroIndex::class)->name('libros.index');
+
+En resources/views/livewire/libro-index.blade.php rellenamos la vista.
