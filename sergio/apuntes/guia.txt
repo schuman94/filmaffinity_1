@@ -446,7 +446,8 @@ ya que si recibimos desde una petición la pelicula, laravel no inyectará la pe
 -------------------------------------TEST--------------------------------------------------------------------------------
 Crear el .env.testing y dentro cambiar los parámetros
 APP_ENV=testing
-DB_DATABASE=noseké_testing
+DB_DATABASE=noseké_testing (esto implica crear una nueva base de datos)
+El usuario puede seguir siendo el mismo.
 
 Crear el archivo de test:
 php artisan make:test VideojuegoTest
