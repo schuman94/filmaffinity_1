@@ -14,6 +14,9 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Livewire -->
+    @livewireStyles
 </head>
 
 <body class="font-sans antialiased">
@@ -86,6 +89,8 @@
             {{ $slot }}
         </main>
     </div>
+    <script src="/js/flowbite/flowbite.min.js"></script>
+    @livewireScripts
 </body>
 
 </html>

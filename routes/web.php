@@ -10,6 +10,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ValoracionController;
 use App\Http\Controllers\VideojuegoController;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\Counter;
 
 Route::get('/', function () {
     return view('welcome');
@@ -52,5 +53,7 @@ Route::post('videojuegos/restaurar/{videojuego}', [VideojuegoController::class, 
 
 Route::get('peliculas_ranking', [PeliculaController::class, 'ranking'])->name('peliculas.ranking');
 Route::get('videojuegos_ranking', [VideojuegoController::class, 'ranking'])->name('videojuegos.ranking');
+
+Route::get('/counter', Counter::class);
 
 require __DIR__.'/auth.php';

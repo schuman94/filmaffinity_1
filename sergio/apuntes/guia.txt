@@ -508,3 +508,40 @@ class PeliculaValoradaMd extends Mailable
 Por ultimo, escribimos el contenido en pelicula-valorada-md.blade.php:
     Has realizado una valoración de la película: {{$pelicula->titulo}}.
     Puntuación: {{$valoracion->puntuacion}}
+
+---------------------LIVEWIRE MANUAL--------------------------------------------------------
+Para instalarlo manualmente: composer require livewire/livewire
+
+Luego creamos un componente con: php artisan make:livewire ValoracionesPelicula
+Este comando nos crea dos archivos:
+    app/Livewire/ValoracionesPelicula.php -> Controla la lógica
+    resources/views/livewire/valoraciones-pelicula.blade.php -> es la vista que se renderiza
+
+Para añadir esa vista en algun lugar, hay que añadir:
+@livewire('valoraciones-pelicula', ['pelicula' => $pelicula])
+(se le indica el nombre de la vista que queremos renderizar, y en un array se le pasan los parametros necesarios)
+
+Los parámetros se recogen en ValoracionesPelicula.php:
+    class ValoracionesPelicula extends Component
+    {
+        public $pelicula;  // Es necesario crear el atributo en la clase.
+
+        public function mount(Pelicula $pelicula) // Con esta función se almacena en el atributo el parámetro recogido
+        {
+            $this->pelicula = $pelicula;
+        }
+
+        public function eliminar()  // Las funciones ya no necesitan parámetros, ya que se usa el atributo de la clase.
+        {
+            $this->pelicula->valoraciones()->delete();
+        }
+
+        public function render() // Retornamos la vista, pasándole algun parametro si es necesario.
+        {
+            return view('livewire.valoraciones-pelicula', [
+                'pelicula' => $this->pelicula->fresh()  // Con el fresh() se hace un refresco en el modelo, para aplicar los cambios.
+            ]);
+        }
+    }
+
+----------------------LIVEWIRE USANDO BREEZE--------------------------------------------------
