@@ -132,7 +132,7 @@
                 </table>
             </div>
 
-            @cannot('videojuego-valorado', $videojuego)
+            @can('valorar', $videojuego)
             <div class="py-6">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <form method="POST" action="{{ route('videojuegos.valorar', $videojuego) }}" class="max-w-sm mx-auto">
@@ -163,7 +163,7 @@
                     </form>
                 </div>
             </div>
-            @endcannot
+            @endcan
         </div>
     </div>
 </x-app-layout>

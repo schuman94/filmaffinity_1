@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreVideojuegoRequest;
 use App\Http\Requests\UpdateVideojuegoRequest;
 use App\Models\Desarrollador;
+use App\Models\Foro;
 use App\Models\Genero;
 use App\Models\User;
 use App\Models\Videojuego;
@@ -52,6 +53,12 @@ class VideojuegoController extends Controller
         $validated['fecha_lanzamiento'] = Carbon::createFromFormat('d-m-Y', $validated['fecha_lanzamiento'], "Europe/Madrid")->utc();
 
         $videojuego = Videojuego::create($validated);
+
+        // En la relacion polimorfica, el asociate lo debe iniciar quien debe almacenar la clave ajena
+        $foro = new Foro();
+        $foro->forable()->associate($videojuego);
+        $foro->save();
+
         session()->flash('exito', 'Videojuego creado correctamente.');
         return redirect()->route('videojuegos.show', $videojuego);
     }
@@ -95,6 +102,7 @@ class VideojuegoController extends Controller
         $validated['fecha_lanzamiento'] = Carbon::createFromFormat('d-m-Y', $validated['fecha_lanzamiento'], "Europe/Madrid")->utc();
         $videojuego->fill($validated);
         $videojuego->save();
+
         session()->flash('exito', 'Videojuego modificado correctamente.');
         return redirect()->route('videojuegos.index');
     }
@@ -132,11 +140,8 @@ class VideojuegoController extends Controller
 
     public function valorar(Request $request, Videojuego $videojuego)
     {
-        if (Gate::allows('videojuego-valorado', $videojuego)) {
-            abort(403);
-            //session()->flash('error', 'Ya has valorado este videojuego.');
-            //return redirect()->back();
-        }
+        // Usando politicas
+        Gate::authorize('valorar', $videojuego);
 
         $validated = $request->validate([
             'puntuacion' => 'required|integer|min:0|max:10',

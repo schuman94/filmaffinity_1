@@ -2,22 +2,12 @@
 
 namespace App\Policies;
 
+use App\Models\Foro;
 use App\Models\User;
-use App\Models\Valoracion;
-use App\Models\Videojuego;
 use Illuminate\Auth\Access\Response;
 
-class VideojuegoPolicy
+class ForoPolicy
 {
-    public function valorar(User $user, Videojuego $videojuego) {
-        $valoracion_existe = Valoracion::where('user_id', $user->id)
-        ->where('valorable_id', $videojuego->id)
-        ->where('valorable_type', Videojuego::class)
-        ->exists();
-
-        return !$valoracion_existe;
-    }
-
     /**
      * Determine whether the user can view any models.
      */
@@ -29,7 +19,7 @@ class VideojuegoPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Videojuego $videojuego): bool
+    public function view(User $user, Foro $foro): bool
     {
         return false;
     }
@@ -45,7 +35,7 @@ class VideojuegoPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Videojuego $videojuego): bool
+    public function update(User $user, Foro $foro): bool
     {
         return false;
     }
@@ -53,7 +43,7 @@ class VideojuegoPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Videojuego $videojuego): bool
+    public function delete(User $user, Foro $foro): bool
     {
         return false;
     }
@@ -61,7 +51,7 @@ class VideojuegoPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Videojuego $videojuego): bool
+    public function restore(User $user, Foro $foro): bool
     {
         return false;
     }
@@ -69,7 +59,7 @@ class VideojuegoPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Videojuego $videojuego): bool
+    public function forceDelete(User $user, Foro $foro): bool
     {
         return false;
     }

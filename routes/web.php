@@ -3,7 +3,9 @@
 //use Illuminate\Support\Facades\Auth;
 //use Illuminate\Support\Facades\DB;
 
+use App\Http\Controllers\ComentarioController;
 use App\Http\Controllers\DesarrolladorController;
+use App\Http\Controllers\ForoController;
 use App\Http\Controllers\GeneroController;
 use App\Http\Controllers\PeliculaController;
 use App\Http\Controllers\ProfileController;
@@ -55,5 +57,11 @@ Route::get('peliculas_ranking', [PeliculaController::class, 'ranking'])->name('p
 Route::get('videojuegos_ranking', [VideojuegoController::class, 'ranking'])->name('videojuegos.ranking');
 
 Route::get('/counter', Counter::class);
+
+Route::resource('foros', ForoController::class);
+Route::resource('comentarios', ComentarioController::class);
+Route::post('comentarios', [ComentarioController::class, 'store'])->middleware('auth')->name('comentarios.store');
+
+
 
 require __DIR__.'/auth.php';

@@ -70,6 +70,10 @@
                                                         Eliminar
                                                     </button>
                                                 </form>
+                                                <a href="{{ route('foros.show', $pelicula->foro) }}"
+                                                    class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                                    Foro
+                                                </a>
                                             </td>
                                         </tr>
                                     @endforeach

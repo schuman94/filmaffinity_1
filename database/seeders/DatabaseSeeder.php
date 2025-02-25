@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
             VideojuegoSeeder::class,
             GeneroableSeeder::class,
             ValoracionSeeder::class,
+            ForoSeeder::class,
+            ComentarioSeeder::class,
         ]);
     }
 }

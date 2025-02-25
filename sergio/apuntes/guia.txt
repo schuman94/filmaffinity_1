@@ -310,17 +310,16 @@ Dentro del modelo Tag no tenemos un metodo taggeable que devuelva todo, sino un 
 
 En DispositivoFactory.php creamos la factoria usando fake. Ejemplo:
 
+
+$colocable = fake()->boolean() ? Aula::inRandomOrder()->first() : Ordenador::inRandomOrder()->first();
 return [
     'codigo' => fake()->unique()->bothify('DISP-??-####'),
     'nombre' => fake()->word(),
-    'colocable_id' => rand(1, 5),
-    'colocable_type' => fake()->randomElement([
-        'App\Models\Ordenador',
-        'App\Models\Aula'
-    ]),
+    'colocable_id' => colocable->id,
+    'colocable_type' => get_class($colocable)
 ];
 
-Para obtener un id aleatorio disponiblede una clave ajena podemos usar Aula::all()->shuffle()->first()->id,(en el caso de colocable no porque colocable no es un modelo)
+Para obtener un id aleatorio disponiblede una clave ajena podemos usar Aula::inRandomOrder()->first()->id
 
 Luego nos vamos a Dispositivo.Seeder.php y creamos la seed. Ejemplo:
 
@@ -397,7 +396,7 @@ En AppServiceProvider.php creamos la gate. La funcion siempre debe devolver true
             ->where('valorable_id', $pelicula->id)
             ->where('valorable_type', Pelicula::class)
             ->exists();
-        });
+        }); // Esta gate no es intuitiva, mejor hacerlo con la politica igual que en videojuegos.
 
 El user siempre se inyecta. Pero además puede requerir otro modelo.
 
@@ -407,14 +406,34 @@ Normalmente se usa la negacion (!), ya que se trata de NO PERMITIR. Aquí unos e
             abort(403);
         }
 
-Aqui no se usa negación (!) porque la logica es si existe un videojuego valorado, entonces no se permite.
-        if (Gate::allows('videojuego-valorado', $videojuego)) {
-            abort(403);
-        }
 
 Si queremos que aparezca/no aparezca el <div> que se encarga de esa acción en la plantilla blade, utilizamos:
 @can('anyadir-genero') y @endcan   (En este caso no se necesita inyectar nada, el usuario ya se inyecta por defecto)
-@cannot('videojuego-valorado', $videojuego) y @endcannot (En este caso la gate necesita que se inyecte el videojuego)
+Tambien esta el @cannot y @endcannot para hacer lo contrario: si no está autorizado, entonces el div aparece.
+
+----------------------------------POLICIES--------------------------------------------------------------------------
+Similar a las gates, pero está pensado para que hagan referencia a modelos. Por ejemplo, ¿un videojuego se puede valorar?
+
+Nos vamos al VideojuegoPolicy.php y creamos la función que nos interese:
+    public function valorar(User $user, Videojuego $videojuego) {
+        $valoracion_existe = Valoracion::where('user_id', $user->id)
+        ->where('valorable_id', $videojuego->id)
+        ->where('valorable_type', Videojuego::class)
+        ->exists();
+
+        return !$valoracion_existe;
+    }
+
+Luego en el controlador ponemos esto:
+    Gate::authorize('valorar', $videojuego);
+Se indica el nombre de la función y se pasa un objeto. Laravel busca la función asociada al modelo de ese objeto.
+Es necesario el use Illuminate\Support\Facades\Gate;
+
+En la plantilla blade tambien podemos usar el @can y @cannot:
+    @can('valorar', $videojuego)
+    @endcan
+
+Recordatorio de que el user se inyecta solo, no hay que indicarlo cuando llamamos a la función.
 
 ----------------------------------SOFT DELETE-----------------------------------------------------------------------
 

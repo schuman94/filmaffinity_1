@@ -30,4 +30,8 @@ class Videojuego extends Model
     public function valoraciones() {
         return $this->morphMany(Valoracion::class, 'valorable');
     }
+
+    public function foro() {
+        return $this->morphOne(Foro::class, 'forable');
+    }
 }

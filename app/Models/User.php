@@ -46,7 +46,12 @@ class User extends Authenticatable
         ];
     }
 
-    protected function valoraciones(){
+    public function valoraciones(){
         return $this->hasMany(Valoracion::class);
     }
+
+    public function comentarios() {
+        return $this->hasMany(Comentario::class);
+    }
+
 }

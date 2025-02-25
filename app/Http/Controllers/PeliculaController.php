@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\PeliculaValoradaMd;
+use App\Models\Foro;
 
 class PeliculaController extends Controller
 {
@@ -50,6 +51,13 @@ class PeliculaController extends Controller
         $validated['fecha_estreno'] = Carbon::createFromFormat('d-m-Y', $validated['fecha_estreno'], "Europe/Madrid")->utc();
 
         $pelicula = Pelicula::create($validated);
+
+        // En la relacion polimorfica, el asociate lo debe iniciar quien debe almacenar la clave ajena
+        $foro = new Foro();
+        //$foro->test = 'valor de prueba';
+        $foro->forable()->associate($pelicula);
+        $foro->save();
+
         session()->flash('exito', 'Pelicula creada correctamente.');
         return redirect()->route('peliculas.show', $pelicula);
     }

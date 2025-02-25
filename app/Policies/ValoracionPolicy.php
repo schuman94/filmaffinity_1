@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Valoracion;
+use App\Models\Videojuego;
 use Illuminate\Auth\Access\Response;
 
 class ValoracionPolicy
@@ -27,9 +28,12 @@ class ValoracionPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, Videojuego $videojuego): bool
     {
-        return false;
+        return Valoracion::where('user_id', $user->id)
+        ->where('valorable_id', $videojuego->id)
+        ->where('valorable_type', Videojuego::class)
+        ->exists();
     }
 
     /**
