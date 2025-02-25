@@ -24,31 +24,58 @@ class ComentarioController extends Controller
      */
     public function create(Request $request)
     {
-        $comentable_type = $request->query('comentable_type');
-        $comentable_id = $request->query('comentable_id');
+        //
+    }
 
+    public function redactar_respuesta(Request $request, Comentario $comentario)
+    {
         return view('comentarios.create',[
-            'comentable_type' => $comentable_type,
-            'comentable_id' => $comentable_id,
+            'comentario' => $comentario
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Foro $foro)
     {
-        // Esta validacion no comprueba si existe el comentable
+        //
+    }
+
+    public function comentar(Request $request, Foro $foro)
+    {
         $validated = $request->validate([
             'contenido' => 'required|string',
-            'comentable_type' => 'required|string',
-            'comentable_id' => 'required|integer',
+        ]);
+
+
+
+        $validated['user_id'] = Auth::id();
+
+        $comentario = new Comentario($validated);
+        $comentario->comentable()->associate($foro);
+
+        $comentario->save();
+
+        session()->flash('exito', 'Comentario creado correctamente.');
+        return redirect()->route('foros.show', $foro);
+
+    }
+
+    public function responder(Request $request, Comentario $comentario)
+    {
+        $validated = $request->validate([
+            'contenido' => 'required|string',
         ]);
 
         $validated['user_id'] = Auth::id();
 
-        $comentario = Comentario::create($validated);
+        //Renombramos la variable, ya que se va a crear otro comentario
+        $padre = $comentario;
 
+        $comentario = new Comentario($validated);
+        $comentario->comentable()->associate($padre);
+        $comentario->save();
 
         // Buscar el foro en la cadena de respuestas
         $comentable = $comentario->comentable;

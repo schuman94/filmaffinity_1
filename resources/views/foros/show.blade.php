@@ -23,10 +23,9 @@
             </div>
 
             <div class="mt-6">
-                <form method="POST" action="{{ route('comentarios.store') }}" class="bg-white p-6 rounded-lg shadow">
+                <form method="POST" action="{{ route('comentarios.comentar', $foro) }}" class="bg-white p-6 rounded-lg shadow">
                     @csrf
-                    <input type="hidden" name="comentable_type" value="{{ get_class($foro) }}">
-                    <input type="hidden" name="comentable_id" value="{{ $foro->id }}">
+                    <input type="hidden" name="foro_id" value="{{ $foro->id }}">
 
                     <div class="mb-4">
                         <label for="contenido" class="block text-gray-700 text-sm font-bold mb-2">Escribe tu comentario:</label>

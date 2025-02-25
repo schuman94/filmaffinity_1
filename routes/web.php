@@ -60,6 +60,11 @@ Route::get('/counter', Counter::class);
 
 Route::resource('foros', ForoController::class);
 Route::resource('comentarios', ComentarioController::class);
+
+Route::post('comentarios/comentar/{foro}', [ComentarioController::class, 'comentar'])->name('comentarios.comentar');
+Route::get('comentarios/redactar_respuesta/{comentario}', [ComentarioController::class, 'redactar_respuesta'])->name('comentarios.redactar_respuesta');
+Route::post('comentarios/responder/{comentario}', [ComentarioController::class, 'responder'])->name('comentarios.responder');
+
 Route::post('comentarios', [ComentarioController::class, 'store'])->middleware('auth')->name('comentarios.store');
 
 

@@ -8,11 +8,8 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <form method="POST" action="{{ route('comentarios.store') }}">
+                <form method="POST" action="{{ route('comentarios.responder', $comentario) }}">
                     @csrf
-                    <input type="hidden" name="comentable_type" value="{{ $comentable_type }}">
-                    <input type="hidden" name="comentable_id" value="{{ $comentable_id }}">
-
                     <div class="mb-4">
                         <label for="contenido" class="block text-gray-700 text-sm font-bold mb-2">Tu respuesta:</label>
                         <textarea name="contenido" id="contenido" rows="4" class="w-full border rounded-lg p-2"></textarea>

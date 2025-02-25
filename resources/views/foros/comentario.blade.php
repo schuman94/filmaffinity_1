@@ -9,9 +9,9 @@
     </div>
     <p class="mt-2 text-gray-700">{{ $comentario->contenido }}</p>
 
-    <!-- Botón de Responder -->
+
     <div class="mt-2">
-        <a href="{{ route('comentarios.create', ['comentable_type' => get_class($comentario), 'comentable_id' => $comentario->id]) }}"
+        <a href="{{ route('comentarios.redactar_respuesta', $comentario) }}"
            class="text-blue-600 hover:text-blue-800 text-sm font-semibold">
             Responder
         </a>
